@@ -1,19 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const querystring = require("querystring");
-class RepositoryQuery {
-    static isMongo(repo) {
-        return repo.constructor.name.includes("MongoRepository"); //this wont work on the client
+var querystring = require("querystring");
+var RepositoryQuery = /** @class */ (function () {
+    function RepositoryQuery() {
     }
-    static toMongoQuery(query) {
-        for (let key in query) {
+    RepositoryQuery.isMongo = function (repo) {
+        return repo.constructor.name.includes("MongoRepository"); //this wont work on the client
+    };
+    RepositoryQuery.toMongoQuery = function (query) {
+        for (var key in query) {
             if (query[key].includes(",")) {
                 query[key] = { $in: query[key].split(",") };
             }
         }
         return query;
-    }
-    static decideImpl(mongo, inMemory, repo) {
+    };
+    RepositoryQuery.decideImpl = function (mongo, inMemory, repo) {
         switch (repo.constructor.name) {
             case this.names.MongoRepository:
                 return mongo;
@@ -22,8 +24,8 @@ class RepositoryQuery {
             default:
                 return inMemory;
         }
-    }
-    static decideImplIcludingAPI(mongo, api, inMemory, repo) {
+    };
+    RepositoryQuery.decideImplIcludingAPI = function (mongo, api, inMemory, repo) {
         switch (repo.constructor.name) {
             case this.names.MongoRepository:
                 return mongo;
@@ -34,7 +36,8 @@ class RepositoryQuery {
                     return mongo;
                 return inMemory;
         }
-    }
-}
-RepositoryQuery.names = { MongoRepository: "MongoRepository", APIRepository: "APIRepository" };
+    };
+    RepositoryQuery.names = { MongoRepository: "MongoRepository", APIRepository: "APIRepository" };
+    return RepositoryQuery;
+}());
 exports.RepositoryQuery = RepositoryQuery;

@@ -1,29 +1,31 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const express = require("express");
-const body_parser_1 = require("body-parser");
-const PORT = 8001;
-class Server {
-    constructor(port) {
+var express = require("express");
+var body_parser_1 = require("body-parser");
+var PORT = 8001;
+var Server = /** @class */ (function () {
+    function Server(port) {
         this.port = port;
         this.app = express();
         this.app.use(body_parser_1.json({ limit: "150mb", type: 'application/json' }));
         this.app.use(body_parser_1.urlencoded({ extended: true }));
     }
-    setupRoutes() {
-    }
-    addRoute(basePath, router) {
+    Server.prototype.setupRoutes = function () {
+    };
+    Server.prototype.addRoute = function (basePath, router) {
         this.app.use(basePath, router);
-    }
-    start() {
+    };
+    Server.prototype.start = function () {
+        var _this = this;
         this.setupRoutes();
-        this.server = this.app.listen(this.port, () => {
-            console.log("info", "--> Server successfully started at port %d", this.port);
+        this.server = this.app.listen(this.port, function () {
+            console.log("info", "--> Server successfully started at port %d", _this.port);
         });
-    }
-    end() {
+    };
+    Server.prototype.end = function () {
         this.server.close();
         console.log("info", "--> Server closed. The port %d is available again", this.port);
-    }
-}
+    };
+    return Server;
+}());
 exports.Server = Server;

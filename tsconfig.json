@@ -4,6 +4,7 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "strict": false
+    "strict": false,
+    "lib":["es6", "dom"]
   }
 }

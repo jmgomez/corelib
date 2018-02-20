@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class NodeUtils {
-    static okOptions(req, res) {
-        res.sendStatus(200);
+var NodeUtils = /** @class */ (function () {
+    function NodeUtils() {
     }
-}
+    NodeUtils.okOptions = function (req, res) {
+        res.sendStatus(200);
+    };
+    return NodeUtils;
+}());
 exports.NodeUtils = NodeUtils;
