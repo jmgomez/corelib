@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5ca8e8c7-d03a-4036-8c4f-e0ab1431d1ec" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/dist/EntityQuery.js" afterPath="$PROJECT_DIR$/dist/EntityQuery.js" />
-      <change beforePath="$PROJECT_DIR$/dist/Repository.js" afterPath="$PROJECT_DIR$/dist/Repository.js" />
-      <change beforePath="$PROJECT_DIR$/dist/RepositoryQuery.js" afterPath="$PROJECT_DIR$/dist/RepositoryQuery.js" />
-      <change beforePath="$PROJECT_DIR$/dist/Utils.js" afterPath="$PROJECT_DIR$/dist/Utils.js" />
-      <change beforePath="$PROJECT_DIR$/dist/corelib-node/NodeUtils.js" afterPath="$PROJECT_DIR$/dist/corelib-node/NodeUtils.js" />
-      <change beforePath="$PROJECT_DIR$/dist/corelib-node/Routers.js" afterPath="$PROJECT_DIR$/dist/corelib-node/Routers.js" />
-      <change beforePath="$PROJECT_DIR$/dist/corelib-node/Server.js" afterPath="$PROJECT_DIR$/dist/corelib-node/Server.js" />
-      <change beforePath="$PROJECT_DIR$/dist/corelib-node/ServerRepositories.js" afterPath="$PROJECT_DIR$/dist/corelib-node/ServerRepositories.js" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" afterPath="$PROJECT_DIR$/tsconfig.json" />
+      <change beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -25,7 +16,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="tsconfig.json" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tsconfig.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tsconfig.json">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="133">
@@ -99,7 +90,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="package.json" pinned="false" current-in-tab="false">
+      <file leaf-file-name="package.json" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/package.json">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="38">
@@ -151,8 +142,8 @@
         <option value="$PROJECT_DIR$/lib/corelib-node/Routers.ts" />
         <option value="$PROJECT_DIR$/lib/corelib-node/ServerRepositories.ts" />
         <option value="$PROJECT_DIR$/dist/.npmignore" />
-        <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/tsconfig.json" />
+        <option value="$PROJECT_DIR$/package.json" />
       </list>
     </option>
   </component>
@@ -244,12 +235,12 @@
       <workItem from="1518636309554" duration="6011000" />
       <workItem from="1518720949622" duration="1383000" />
       <workItem from="1519058397144" duration="714000" />
-      <workItem from="1519151469803" duration="793000" />
+      <workItem from="1519151469803" duration="819000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8901000" />
+    <option name="totallyTimeSpent" value="8927000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="2560" height="1337" extended-state="6" />
@@ -678,14 +669,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dist/.npmignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dist/Utils.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="95">
@@ -694,18 +677,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="19" lean-forward="false" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tsconfig.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="133">
           <caret line="7" column="23" lean-forward="false" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/.npmignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38">
+          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38">
+          <caret line="2" column="19" lean-forward="false" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
           <folding />
         </state>
       </provider>
