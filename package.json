@@ -1,6 +1,6 @@
 {
   "name": "corelib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for bootstraping ts large applications. It covers backend and frontend. It is *not* production ready and it *does not* work out of the box.  ",
   "main": "",
   "scripts": {
