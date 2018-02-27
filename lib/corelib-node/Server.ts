@@ -12,6 +12,8 @@ import {EntityQuery} from "../EntityQuery";
 import * as http from "http";
 
 import {NextFunction} from "express-serve-static-core";
+import {Route} from "./Routers";
+import {Entity} from "../Entity";
 
 
 
@@ -34,8 +36,12 @@ export class Server {
       
     }
 
-    public addRoute(basePath:string, router:Router){
+    public addRouter(basePath:string, router:Router){
         this.app.use(basePath, router);
+    }
+
+    public addRoute(basePath:string, route:Route<Entity>){
+        this.app.use(basePath, route.configureRouter());
     }
 
     public start(){

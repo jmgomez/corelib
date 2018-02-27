@@ -9,7 +9,7 @@ export class RepositoryQuery {
     static names = {MongoRepository:"MongoRepository", APIRepository: "APIRepository"};
 
     static isMongo<T extends Entity>(repo:IReactiveRepository<T>){
-        return repo.constructor.name.includes("MongoRepository"); //this wont work on the client
+        return repo.constructor["name"].includes("MongoRepository"); //this wont work on the client
     }
 
     static toMongoQuery(query:object){
@@ -23,7 +23,7 @@ export class RepositoryQuery {
 
     static decideImpl<T extends Entity>(mongo:any, inMemory:any, repo:IReactiveRepository<T>){
 
-        switch (repo.constructor.name){
+        switch (repo.constructor["name"]){
             case this.names.MongoRepository:
                 return mongo;
             case this.names.APIRepository:
@@ -35,7 +35,7 @@ export class RepositoryQuery {
 
     static decideImplIcludingAPI<T extends Entity>(mongo:any,api:any, inMemory:any, repo:IReactiveRepository<T>){
 
-        switch (repo.constructor.name){
+        switch (repo.constructor["name"]){
             case this.names.MongoRepository:
                 return mongo;
             case this.names.APIRepository:

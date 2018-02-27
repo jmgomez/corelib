@@ -12,8 +12,11 @@ var Server = /** @class */ (function () {
     }
     Server.prototype.setupRoutes = function () {
     };
-    Server.prototype.addRoute = function (basePath, router) {
+    Server.prototype.addRouter = function (basePath, router) {
         this.app.use(basePath, router);
+    };
+    Server.prototype.addRoute = function (basePath, route) {
+        this.app.use(basePath, route.configureRouter());
     };
     Server.prototype.start = function () {
         var _this = this;
