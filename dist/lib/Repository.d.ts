@@ -66,6 +66,7 @@ export declare class SyncReactiveRepository<T extends Entity> implements IReacti
     getAllBy(query: any): Bacon.EventStream<any, T[]>;
     getById(id: string): Bacon.EventStream<{}, TsMonad.Maybe<T>>;
     getOneBy(query: any): Bacon.EventStream<{}, TsMonad.Maybe<T>>;
+    asInMemoryRepository(): InMemoryRepository<T>;
 }
 export interface IReactiveRepository<T extends Entity> {
     add: (value: T) => Bacon.EventStream<any, T>;

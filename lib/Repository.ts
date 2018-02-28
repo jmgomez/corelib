@@ -184,6 +184,10 @@ export class SyncReactiveRepository<T extends Entity> implements IReactiveReposi
     getOneBy(query:any){
         return Bacon.later(0, this.repo.getOneBy(query));
     }
+
+    asInMemoryRepository(){
+        return this.repo as InMemoryRepository<T>;
+    }
 }
 
 

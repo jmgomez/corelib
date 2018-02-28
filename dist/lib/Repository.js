@@ -139,6 +139,9 @@ var SyncReactiveRepository = /** @class */ (function () {
     SyncReactiveRepository.prototype.getOneBy = function (query) {
         return Bacon.later(0, this.repo.getOneBy(query));
     };
+    SyncReactiveRepository.prototype.asInMemoryRepository = function () {
+        return this.repo;
+    };
     return SyncReactiveRepository;
 }());
 exports.SyncReactiveRepository = SyncReactiveRepository;
