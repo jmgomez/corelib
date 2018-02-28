@@ -46,9 +46,8 @@ var Route = /** @class */ (function () {
             R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
         };
         this.update = function (req, res) {
-            console.log("CALL UPDATE FROM CORELIB");
             var updateFromRepo = function (e) {
-                var stream = _this.repo.update(e);
+                var stream = _this.repo.update(req.body);
                 stream.onValue(function (e) {
                     return res.status(200).json(e);
                 });

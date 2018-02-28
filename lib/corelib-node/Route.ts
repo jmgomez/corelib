@@ -74,9 +74,8 @@ export class Route<T extends Entity> {
     };
 
     update = (req: Request, res: Response) => {
-        console.log("CALL UPDATE FROM CORELIB")
         let updateFromRepo = (e:T) => {
-            let stream = this.repo.update(e);
+            let stream = this.repo.update(req.body);
             stream.onValue((e) =>
                 res.status(200).json(e));
             stream.onError(e => res.status(500).send(e));
