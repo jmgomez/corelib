@@ -5,6 +5,8 @@
     "declaration": true,
     "outDir": "./dist",
     "strict": false,
-    "lib":["es5", "dom"]
+    "lib":["es5", "dom"],
+    "types": ["node", "mocha", "chai"],
+    "sourceMap": true
   }
 }

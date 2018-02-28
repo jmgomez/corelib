@@ -127,6 +127,10 @@ export class InMemoryRepository<T extends Entity> implements IRepository<T>{
     removeAllBy(query:any){
         return this.removeAll();
     }
+
+    toReactiveRepository(){
+        return new SyncReactiveRepository(this);
+    }
 }
 
 export class SyncReactiveRepository<T extends Entity> implements IReactiveRepository<T> {

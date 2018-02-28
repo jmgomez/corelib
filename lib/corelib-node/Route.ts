@@ -1,4 +1,5 @@
 import * as TsMonad from 'tsmonad';
+import * as R from 'ramda'
 import {IReactiveRepository, IRepository } from "../Repository";
 
 import {EntityQuery} from "../EntityQuery";
@@ -12,14 +13,15 @@ import {RepositoryQuery} from "../RepositoryQuery";
 
 
 
-export class Route<T extends Entity>{
-    repo : IReactiveRepository<T>;
-    private constructor(repo:IReactiveRepository<T>){
+export class Route<T extends Entity> {
+    repo: IReactiveRepository<T>;
+
+    constructor(repo: IReactiveRepository<T>) {
         this.repo = repo;
 
     }
 
-    configureRouter<T extends Entity>() : Router{
+    configureRouter<T extends Entity>(): Router {
         let router = Router();
         router.route("/").get(this.getAll).post(this.create).options(NodeUtils.okOptions);
         router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils.okOptions);
@@ -28,64 +30,90 @@ export class Route<T extends Entity>{
         return router;
     }
 
-    getEntities = (req:any)=> <Entity[]>req['entities'];
-    setEntities = (req:Request, res:Response, next: NextFunction) => {
-        this.repo.getAll().onValue(entities=> {
-            EntityQuery.tryGetById(entities, req.params.id)
-                .caseOf({
-                    just: e => {
-                        (req as any)['entities'] = entities;
-                        next();
-                    },
-                    nothing: () => {
-                        res.sendStatus(404);
-                    }
-                });
+    getEntities = (req: any) => <Entity[]>req['entities'];
+    setEntities = (req: Request, res: Response, next: NextFunction) => {
+        this.repo.getAll().onValue(entities => {
+            console.log("GET THE ENTITIES FROM THE REPO");
+            (req as any)['entities'] = entities;
+            next();
         });
     };
 
-    getAll = (req:Request, res:Response) => {
-        this.repo.getAll().onValue(entities=> {
+    getAll = (req: Request, res: Response) => {
+        this.repo.getAll().onValue(entities => {
             return res.status(200).json(entities);
         })
     };
 
-    create = (req:Request, res:Response) =>{  //one or more
-        let stream : EventStream<any, any> = Array.isArray(req.body) ?
+    create = (req: Request, res: Response) => {  //one or more
+        console.log("CREATING IS CALLED")
+        let stream: EventStream<any, any> = Array.isArray(req.body) ?
             this.repo.addMany(req.body)
             : this.repo.add(req.body);
-        stream.onValue(e=>res.status(201).json(req.body));
+        stream.onValue(e => res.status(201).json(req.body));
     };
 
-    getAllBy = (req:Request, res:Response) =>{
+    getAllBy = (req: Request, res: Response) => {
         let query = req.query;
         let stream = this.repo.getAllBy(RepositoryQuery.toMongoQuery(query));
-        stream.onValue(v=> res.status(200).json(v));
-        stream.onError(e=> res.status(500).send(e));
+        stream.onValue(v => res.status(200).json(v));
+        stream.onError(e => res.status(500).send(e));
     };
 
-    deleteAllBy = (req:Request, res:Response) =>{
+    deleteAllBy = (req: Request, res: Response) => {
         let query = req.query;
         let stream = this.repo.removeAllBy(RepositoryQuery.toMongoQuery(query));
-        stream.onValue(v=> res.status(200).json(v));
-        stream.onError(e=> res.status(500).send(e));
+        stream.onValue(v => res.status(200).json(v));
+        stream.onError(e => res.status(500).send(e));
     };
 
-    getById = (req:Request, res:Response) =>{
+    getById = (req: Request, res: Response) => {
+        let sendEntity = e => res.status(200).json(e);
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.getOrNotFound(maybeEntity, res, sendEntity);
+        R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req)
+    };
+
+    update = (req: Request, res: Response) => {
+        console.log("CALL UPDATE FROM CORELIB")
+        let updateFromRepo = (e:T) => {
+            let stream = this.repo.update(e);
+            stream.onValue((e) =>
+                res.status(200).json(e));
+            stream.onError(e => res.status(500).send(e));
+        };
+
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.getOrNotFound(maybeEntity, res, updateFromRepo);
+        R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req);
+    };
+
+
+    delete = (req: Request, res: Response) => {
+        let deleteFromRepo = (e:T) => {
+            let stream = this.repo.remove(e);
+            stream.onValue((e) =>
+                res.status(200).json(e));
+            stream.onError(e => res.status(500).send(e));
+        };
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.getOrNotFound(maybeEntity, res, deleteFromRepo);
+        R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req);
+    };
+
+
+
+    private getOrNotFound = (maybeEntity:TsMonad.Maybe<T>, res:Response, getEntity:(e:T)=>void) => {
+        maybeEntity.caseOf({
+            just: (e) => {
+                getEntity(e);
+            },
+            nothing: () => {
+                res.sendStatus(404);
+            }
+        });
+    };
+
+    private tryGetByIdParam = (req:Request) => {
         let id = req.params.id;
-        let entity = EntityQuery.getById(this.getEntities(req), id) as T;
-        res.status(200).json(entity);
-    };
-
-    update = (req:Request, res:Response) =>{
-        this.repo.update(req.body).onValue((e)=>
-            res.status(200).json(e));
-    };
-
-    delete = (req:Request, res:Response) =>{
-        let id = req.params.id;
-        let entity = EntityQuery.getById(this.getEntities(req), id) as T;
-        this.repo.remove(entity).onValue(()=>res.sendStatus(200));
+        return EntityQuery.tryGetById(this.getEntities(req), id);
     };
 
 }

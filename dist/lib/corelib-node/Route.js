@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var R = require("ramda");
 var EntityQuery_1 = require("../EntityQuery");
 var NodeUtils_1 = require("./NodeUtils");
 var express_1 = require("express");
@@ -10,16 +11,9 @@ var Route = /** @class */ (function () {
         this.getEntities = function (req) { return req['entities']; };
         this.setEntities = function (req, res, next) {
             _this.repo.getAll().onValue(function (entities) {
-                EntityQuery_1.EntityQuery.tryGetById(entities, req.params.id)
-                    .caseOf({
-                    just: function (e) {
-                        req['entities'] = entities;
-                        next();
-                    },
-                    nothing: function () {
-                        res.sendStatus(404);
-                    }
-                });
+                console.log("GET THE ENTITIES FROM THE REPO");
+                req['entities'] = entities;
+                next();
             });
         };
         this.getAll = function (req, res) {
@@ -28,6 +22,7 @@ var Route = /** @class */ (function () {
             });
         };
         this.create = function (req, res) {
+            console.log("CREATING IS CALLED");
             var stream = Array.isArray(req.body) ?
                 _this.repo.addMany(req.body)
                 : _this.repo.add(req.body);
@@ -46,19 +41,46 @@ var Route = /** @class */ (function () {
             stream.onError(function (e) { return res.status(500).send(e); });
         };
         this.getById = function (req, res) {
-            var id = req.params.id;
-            var entity = EntityQuery_1.EntityQuery.getById(_this.getEntities(req), id);
-            res.status(200).json(entity);
+            var sendEntity = function (e) { return res.status(200).json(e); };
+            var partialGetOrNotFound = function (maybeEntity) { return _this.getOrNotFound(maybeEntity, res, sendEntity); };
+            R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
         };
         this.update = function (req, res) {
-            _this.repo.update(req.body).onValue(function (e) {
-                return res.status(200).json(e);
-            });
+            console.log("CALL UPDATE FROM CORELIB");
+            var updateFromRepo = function (e) {
+                var stream = _this.repo.update(e);
+                stream.onValue(function (e) {
+                    return res.status(200).json(e);
+                });
+                stream.onError(function (e) { return res.status(500).send(e); });
+            };
+            var partialGetOrNotFound = function (maybeEntity) { return _this.getOrNotFound(maybeEntity, res, updateFromRepo); };
+            R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
         };
         this.delete = function (req, res) {
+            var deleteFromRepo = function (e) {
+                var stream = _this.repo.remove(e);
+                stream.onValue(function (e) {
+                    return res.status(200).json(e);
+                });
+                stream.onError(function (e) { return res.status(500).send(e); });
+            };
+            var partialGetOrNotFound = function (maybeEntity) { return _this.getOrNotFound(maybeEntity, res, deleteFromRepo); };
+            R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
+        };
+        this.getOrNotFound = function (maybeEntity, res, getEntity) {
+            maybeEntity.caseOf({
+                just: function (e) {
+                    getEntity(e);
+                },
+                nothing: function () {
+                    res.sendStatus(404);
+                }
+            });
+        };
+        this.tryGetByIdParam = function (req) {
             var id = req.params.id;
-            var entity = EntityQuery_1.EntityQuery.getById(_this.getEntities(req), id);
-            _this.repo.remove(entity).onValue(function () { return res.sendStatus(200); });
+            return EntityQuery_1.EntityQuery.tryGetById(_this.getEntities(req), id);
         };
         this.repo = repo;
     }
@@ -122,3 +144,4 @@ function routerFor(repo, fromJSON) {
     return router;
 }
 exports.routerFor = routerFor;
+//# sourceMappingURL=Route.js.map

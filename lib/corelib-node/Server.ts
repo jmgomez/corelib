@@ -12,8 +12,8 @@ import {EntityQuery} from "../EntityQuery";
 import * as http from "http";
 
 import {NextFunction} from "express-serve-static-core";
-import {Route} from "./Routers";
 import {Entity} from "../Entity";
+import {Route} from "./Route";
 
 
 
@@ -23,6 +23,7 @@ const PORT: number = 8001;
 export class Server {
     app: Express;
     server : http.Server;
+    routes : Route<Entity>[];
     private port : number;
 
     constructor(port:number) {
@@ -30,6 +31,7 @@ export class Server {
         this.app = express();
         this.app.use(json({limit:"150mb", type:'application/json'}));
         this.app.use(urlencoded({ extended: true }));
+        this.routes = [];
     }
 
     protected setupRoutes(): void {
@@ -41,6 +43,7 @@ export class Server {
     }
 
     public addRoute(basePath:string, route:Route<Entity>){
+        this.routes.push(route)
         this.app.use(basePath, route.configureRouter());
     }
 
