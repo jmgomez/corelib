@@ -11,7 +11,6 @@ var Route = /** @class */ (function () {
         this.getEntities = function (req) { return req['entities']; };
         this.setEntities = function (req, res, next) {
             _this.repo.getAll().onValue(function (entities) {
-                console.log("GET THE ENTITIES FROM THE REPO");
                 req['entities'] = entities;
                 next();
             });
@@ -22,27 +21,37 @@ var Route = /** @class */ (function () {
             });
         };
         this.create = function (req, res) {
-            console.log("CREATING IS CALLED");
             var stream = Array.isArray(req.body) ?
                 _this.repo.addMany(req.body)
                 : _this.repo.add(req.body);
             stream.onValue(function (e) { return res.status(201).json(req.body); });
+            "";
         };
         this.getAllBy = function (req, res) {
             var query = req.query;
-            var stream = _this.repo.getAllBy(RepositoryQuery_1.RepositoryQuery.toMongoQuery(query));
+            "";
+            var stream = _this.repo.getAllBy(RepositoryQuery_1.RepositoryQuery.fromQueryStringTo(query, _this.repo));
             stream.onValue(function (v) { return res.status(200).json(v); });
             stream.onError(function (e) { return res.status(500).send(e); });
         };
         this.deleteAllBy = function (req, res) {
             var query = req.query;
-            var stream = _this.repo.removeAllBy(RepositoryQuery_1.RepositoryQuery.toMongoQuery(query));
+            var stream = _this.repo.removeAllBy(RepositoryQuery_1.RepositoryQuery.fromQueryStringTo(query, _this.repo));
             stream.onValue(function (v) { return res.status(200).json(v); });
             stream.onError(function (e) { return res.status(500).send(e); });
         };
         this.getById = function (req, res) {
-            var sendEntity = function (e) { return res.status(200).json(e); };
-            var partialGetOrNotFound = function (maybeEntity) { return _this.getOrNotFound(maybeEntity, res, sendEntity); };
+            // let id = req.params.id;
+            // let maybeEntity = EntityQuery.tryGetById(this.getEntities(req), id);
+            // maybeEntity.caseOf({
+            //     just: entity=> res.status(200).json(entity),
+            //     nothing: () => res.sendStatus(404)
+            // });
+            //
+            var sendEntity = function (e) {
+                return res.status(200).json(e);
+            };
+            var partialGetOrNotFound = function (maybeEntity) { return _this.executeOrNotFound(maybeEntity, res, sendEntity); };
             R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
         };
         this.update = function (req, res) {
@@ -53,21 +62,22 @@ var Route = /** @class */ (function () {
                 });
                 stream.onError(function (e) { return res.status(500).send(e); });
             };
-            var partialGetOrNotFound = function (maybeEntity) { return _this.getOrNotFound(maybeEntity, res, updateFromRepo); };
+            var partialGetOrNotFound = function (maybeEntity) { return _this.executeOrNotFound(maybeEntity, res, updateFromRepo); };
             R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
         };
         this.delete = function (req, res) {
             var deleteFromRepo = function (e) {
                 var stream = _this.repo.remove(e);
                 stream.onValue(function (e) {
-                    return res.status(200).json(e);
+                    res.status(200).json(e);
+                    return Bacon.End;
                 });
                 stream.onError(function (e) { return res.status(500).send(e); });
             };
-            var partialGetOrNotFound = function (maybeEntity) { return _this.getOrNotFound(maybeEntity, res, deleteFromRepo); };
+            var partialGetOrNotFound = function (maybeEntity) { return _this.executeOrNotFound(maybeEntity, res, deleteFromRepo); };
             R.compose(partialGetOrNotFound, _this.tryGetByIdParam)(req);
         };
-        this.getOrNotFound = function (maybeEntity, res, getEntity) {
+        this.executeOrNotFound = function (maybeEntity, res, getEntity) {
             maybeEntity.caseOf({
                 just: function (e) {
                     getEntity(e);
@@ -86,9 +96,9 @@ var Route = /** @class */ (function () {
     Route.prototype.configureRouter = function () {
         var router = express_1.Router();
         router.route("/").get(this.getAll).post(this.create).options(NodeUtils_1.NodeUtils.okOptions);
-        router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils_1.NodeUtils.okOptions);
         router.route("/deleteall").get(this.deleteAllBy).options(NodeUtils_1.NodeUtils.okOptions);
         router.route("/getallby").get(this.getAllBy).options(NodeUtils_1.NodeUtils.okOptions);
+        router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils_1.NodeUtils.okOptions);
         return router;
     };
     return Route;

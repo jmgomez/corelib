@@ -75,7 +75,7 @@ var InMemoryRepository = /** @class */ (function () {
         return this.elems;
     };
     InMemoryRepository.prototype.getAllBy = function (query) {
-        return this.elems;
+        return this.elems.filter(query);
     };
     InMemoryRepository.prototype.getById = function (id) {
         console.log("Requesting by id", id, this.elems);

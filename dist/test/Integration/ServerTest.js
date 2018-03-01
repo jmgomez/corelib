@@ -6,6 +6,7 @@ var Route_1 = require("../../lib/corelib-node/Route");
 var Repository_1 = require("../../lib/Repository");
 var Mappers_1 = require("../../lib/Mappers");
 var ReqHelper_1 = require("../../lib/corelib-node/ReqHelper");
+var querystring = require("querystring");
 describe("Server CRUD", function () {
     var serverEndPoint = "http://localhost:9000/";
     var server;
@@ -29,12 +30,31 @@ describe("Server CRUD", function () {
             done();
         });
     });
-    it.only("Should modify an existing entity", function (done) {
+    it("Should modify an existing entity", function (done) {
         var foo = { id: "foo", title: "blabla" };
         repo.asInMemoryRepository().elems = [foo];
         var modifiedText = "lol";
         apiRepo.update({ id: "foo", title: modifiedText }).onValue(function (v) {
             chai_1.expect(v.title).eq(modifiedText);
+            done();
+        });
+    });
+    it("Should be able to retrieve an existing entity by its id", function (done) {
+        var foo = { id: "foo", title: "blabla" };
+        repo.asInMemoryRepository().elems = [foo];
+        var stream = apiRepo.getById("foo").map(function (f) { return f.value; });
+        stream.onValue(function (v) {
+            chai_1.expect(v.title).eq(foo.title);
+            done();
+        });
+    });
+    it("Should be able to query a set of entities", function (done) {
+        var foos = [{ id: "foo", title: "lo" }, { id: "foo2", title: "query" }, { id: "foo3", title: "query" }];
+        repo.asInMemoryRepository().elems = foos;
+        var query = "?" + querystring.stringify({ title: "query" });
+        var stream = apiRepo.getAllBy(query);
+        stream.onValue(function (v) {
+            chai_1.expect(v.length).eq(2);
             done();
         });
     });

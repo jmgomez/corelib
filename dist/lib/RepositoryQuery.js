@@ -15,6 +15,19 @@ var RepositoryQuery = /** @class */ (function () {
         }
         return query;
     };
+    RepositoryQuery.toInMemoryRepo = function (query) {
+        return function (e) {
+            for (var key in query)
+                if (e[key] !== query[key])
+                    return false;
+            return true;
+        };
+    };
+    RepositoryQuery.fromQueryStringTo = function (query, repo) {
+        if (this.isMongo(repo))
+            return this.toMongoQuery(query);
+        return this.toInMemoryRepo(query);
+    };
     RepositoryQuery.decideImpl = function (mongo, inMemory, repo) {
         switch (repo.constructor["name"]) {
             case this.names.MongoRepository:

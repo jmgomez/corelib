@@ -115,7 +115,7 @@ export class InMemoryRepository<T extends Entity> implements IRepository<T>{
         return this.elems;
     }
     getAllBy(query:any){
-        return this.elems;
+        return this.elems.filter(query);
     }
     getById(id:string){
         console.log("Requesting by id", id, this.elems)

@@ -14,7 +14,7 @@ export declare class Route<T extends Entity> {
     getById: (req: Request, res: Response) => void;
     update: (req: Request, res: Response) => void;
     delete: (req: Request, res: Response) => void;
-    private getOrNotFound;
+    private executeOrNotFound;
     private tryGetByIdParam;
 }
 export declare function routerFor<T extends Entity>(repo: IReactiveRepository<T>, fromJSON: (json: any) => T): Router;

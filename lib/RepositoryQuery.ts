@@ -21,6 +21,21 @@ export class RepositoryQuery {
         return query;
     }
 
+    static toInMemoryRepo(query:object){
+        return (e:Entity)=> {
+            for(let key in query)
+               if(e[key] !== query[key])
+                   return false;
+            return true;
+        }
+    }
+
+    static fromQueryStringTo<T extends Entity>(query:object, repo:IReactiveRepository<T>){
+        if(this.isMongo(repo))
+            return this.toMongoQuery(query);
+        return this.toInMemoryRepo(query)
+    }
+
     static decideImpl<T extends Entity>(mongo:any, inMemory:any, repo:IReactiveRepository<T>){
 
         switch (repo.constructor["name"]){

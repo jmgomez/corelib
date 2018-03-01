@@ -24,16 +24,15 @@ export class Route<T extends Entity> {
     configureRouter<T extends Entity>(): Router {
         let router = Router();
         router.route("/").get(this.getAll).post(this.create).options(NodeUtils.okOptions);
-        router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils.okOptions);
         router.route("/deleteall").get(this.deleteAllBy).options(NodeUtils.okOptions);
         router.route("/getallby").get(this.getAllBy).options(NodeUtils.okOptions);
+        router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils.okOptions);
         return router;
     }
 
     getEntities = (req: any) => <Entity[]>req['entities'];
     setEntities = (req: Request, res: Response, next: NextFunction) => {
         this.repo.getAll().onValue(entities => {
-            console.log("GET THE ENTITIES FROM THE REPO");
             (req as any)['entities'] = entities;
             next();
         });
@@ -46,30 +45,38 @@ export class Route<T extends Entity> {
     };
 
     create = (req: Request, res: Response) => {  //one or more
-        console.log("CREATING IS CALLED")
         let stream: EventStream<any, any> = Array.isArray(req.body) ?
             this.repo.addMany(req.body)
             : this.repo.add(req.body);
-        stream.onValue(e => res.status(201).json(req.body));
+        stream.onValue(e => res.status(201).json(req.body)); ``
     };
 
     getAllBy = (req: Request, res: Response) => {
-        let query = req.query;
-        let stream = this.repo.getAllBy(RepositoryQuery.toMongoQuery(query));
+        let query = req.query; ``
+        let stream = this.repo.getAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo));
         stream.onValue(v => res.status(200).json(v));
         stream.onError(e => res.status(500).send(e));
     };
 
     deleteAllBy = (req: Request, res: Response) => {
         let query = req.query;
-        let stream = this.repo.removeAllBy(RepositoryQuery.toMongoQuery(query));
+        let stream = this.repo.removeAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo));
         stream.onValue(v => res.status(200).json(v));
         stream.onError(e => res.status(500).send(e));
     };
 
-    getById = (req: Request, res: Response) => {
-        let sendEntity = e => res.status(200).json(e);
-        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.getOrNotFound(maybeEntity, res, sendEntity);
+    getById = (req: Request, res: Response)  => {
+        // let id = req.params.id;
+        // let maybeEntity = EntityQuery.tryGetById(this.getEntities(req), id);
+        // maybeEntity.caseOf({
+        //     just: entity=> res.status(200).json(entity),
+        //     nothing: () => res.sendStatus(404)
+        // });
+        //
+        let sendEntity = e =>
+            res.status(200).json(e);
+
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, sendEntity);
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req)
     };
 
@@ -81,7 +88,7 @@ export class Route<T extends Entity> {
             stream.onError(e => res.status(500).send(e));
         };
 
-        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.getOrNotFound(maybeEntity, res, updateFromRepo);
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, updateFromRepo);
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req);
     };
 
@@ -89,23 +96,26 @@ export class Route<T extends Entity> {
     delete = (req: Request, res: Response) => {
         let deleteFromRepo = (e:T) => {
             let stream = this.repo.remove(e);
-            stream.onValue((e) =>
-                res.status(200).json(e));
+            stream.onValue((e) =>{
+                res.status(200).json(e);
+                return Bacon.End;
+        });
             stream.onError(e => res.status(500).send(e));
         };
-        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.getOrNotFound(maybeEntity, res, deleteFromRepo);
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, deleteFromRepo);
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req);
     };
 
 
 
-    private getOrNotFound = (maybeEntity:TsMonad.Maybe<T>, res:Response, getEntity:(e:T)=>void) => {
+    private executeOrNotFound = (maybeEntity:TsMonad.Maybe<T>, res:Response, getEntity:(e:T)=>void) => {
         maybeEntity.caseOf({
             just: (e) => {
                 getEntity(e);
             },
             nothing: () => {
                 res.sendStatus(404);
+
             }
         });
     };
