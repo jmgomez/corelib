@@ -138,8 +138,12 @@ export class MongoRepository<T extends Entity> implements IReactiveRepository<T>
     }
 
     update(value: T) {
-        let updateCmd = (db:Db)=> Bacon.fromPromise(db.collection(this.collection).updateOne({_id:value.id}, this.toMongoEntity(value)))
-            .map(r=>value); //Checks if there was an error
+        let updateCmd = (db:Db)=> Bacon.fromPromise(db.collection(this.collection).updateOne({_id:value.id}, {$set: this.toMongoEntity(value)}))
+            .map(r=>{
+                    console.log(r.result);
+                    return value;
+                });
+    //Checks if there was an error
         return this.executeCommandAndCloseConn(updateCmd);
     }
 

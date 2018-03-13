@@ -30,13 +30,14 @@ export class RepositoryQuery {
         }
     }
 
-    static fromQueryStringTo<T extends Entity>(query:object, repo:IReactiveRepository<T>){
+    static fromQueryStringTo<T extends Entity>(query:object, repo:any){
+
         if(this.isMongo(repo))
             return this.toMongoQuery(query);
         return this.toInMemoryRepo(query)
     }
 
-    static decideImpl<T extends Entity>(mongo:any, inMemory:any, repo:IReactiveRepository<T>){
+    static decideImpl<T extends Entity>(mongo:any, inMemory:any, repo:any){
 
         switch (repo.constructor["name"]){
             case this.names.MongoRepository:

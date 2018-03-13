@@ -111,8 +111,12 @@ var MongoRepository = /** @class */ (function () {
     };
     MongoRepository.prototype.update = function (value) {
         var _this = this;
-        var updateCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).updateOne({ _id: value.id }, _this.toMongoEntity(value)))
-            .map(function (r) { return value; }); }; //Checks if there was an error
+        var updateCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).updateOne({ _id: value.id }, { $set: _this.toMongoEntity(value) }))
+            .map(function (r) {
+            console.log(r.result);
+            return value;
+        }); };
+        //Checks if there was an error
         return this.executeCommandAndCloseConn(updateCmd);
     };
     MongoRepository.prototype.getById = function (id) {

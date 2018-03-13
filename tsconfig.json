@@ -5,8 +5,9 @@
     "declaration": true,
     "outDir": "./dist",
     "strict": false,
-    "lib":["es5", "dom"],
+    "lib":["es5", "dom", "es2015.promise"],
     "types": ["node", "mocha", "chai"],
-    "sourceMap": true
+    "sourceMap": true,
+    "alwaysStrict": false
   }
 }

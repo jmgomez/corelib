@@ -2,7 +2,7 @@ import {expect, assert} from "chai";
 import {Server} from "../../lib/corelib-node/Server";
 import {Route} from "../../lib/corelib-node/Route";
 import {
-    APIRepository, InMemoryRepository, IReactiveRepository, ReqHelper,
+    APIRepository, InMemoryRepository, IReactiveRepository, IRxRepository, ReqHelper,
     SyncReactiveRepository
 } from "../../lib/Repository";
 import {fromJSON} from "../../lib/Mappers";
@@ -15,12 +15,12 @@ describe("Server CRUD", ()=>{
     let serverEndPoint =  "http://localhost:9000/";
     let server : Server;
     let apiRepo : APIRepository<Foo>;
-    let repo : IReactiveRepository<Foo>;
+    let repo : IRxRepository<Foo>;
 
     before(()=>{
         apiRepo = new APIRepository<Foo>(serverEndPoint+"foo/", fromJSON,  RequestHelperNodeImpl);
         server = new Server(9000);
-        repo = new InMemoryRepository<Foo>([]).toReactiveRepository();
+        repo = new InMemoryRepository<Foo>([]).toRxRepository();
         let route = new Route(repo);
         server.addRoute("/foo", route);
         server.start();
@@ -45,7 +45,7 @@ describe("Server CRUD", ()=>{
     it("Should modify an existing entity", done => {
         let foo = { id: "foo", title: "blabla" };
 
-        (repo as SyncReactiveRepository<Foo>).asInMemoryRepository().elems = [foo];
+        (<SyncReactiveRepository<Foo>> (repo as any)).asInMemoryRepository().elems = [foo];
 
         let modifiedText = "lol";
 
@@ -59,7 +59,7 @@ describe("Server CRUD", ()=>{
     it("Should be able to retrieve an existing entity by its id", done => {
         let foo = { id: "foo", title: "blabla" };
 
-        (repo as SyncReactiveRepository<Foo>).asInMemoryRepository().elems = [foo];
+        (<SyncReactiveRepository<Foo>> (repo as any)).asInMemoryRepository().elems = [foo];
 
         let stream = apiRepo.getById("foo").map((f:any)=>f.value as Foo);
         stream.onValue((v)=>{
@@ -70,7 +70,7 @@ describe("Server CRUD", ()=>{
 
     it("Should be able to query a set of entities", done => {
         let foos = [{ id: "foo", title: "lo" }, { id: "foo2", title: "query" }, { id: "foo3", title: "query" }];
-        (repo as SyncReactiveRepository<Foo>).asInMemoryRepository().elems = foos;
+        (<SyncReactiveRepository<Foo>> (repo as any)).asInMemoryRepository().elems = foos;
         let query = "?"+querystring.stringify({title:"query"})
         let stream = apiRepo.getAllBy(query);
         stream.onValue((v)=>{

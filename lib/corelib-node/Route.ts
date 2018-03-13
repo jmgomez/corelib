@@ -1,11 +1,12 @@
 import * as TsMonad from 'tsmonad';
 import * as R from 'ramda'
-import {IReactiveRepository, IRepository } from "../Repository";
+import * as Bacon from 'baconjs';
+import * as Rx from 'rx';
+import {IReactiveRepository, IRepository, IRxRepository} from "../Repository";
 
 import {EntityQuery} from "../EntityQuery";
 import {BaconUtils, DateUtils, MonadUtils, NumberUtils, Period} from "../Utils";
 
-import EventStream = Bacon.EventStream;
 import {Entity} from "../Entity";
 import {NodeUtils} from "./NodeUtils";
 import {Router, Request, Response, NextFunction} from "express";
@@ -14,9 +15,9 @@ import {RepositoryQuery} from "../RepositoryQuery";
 
 
 export class Route<T extends Entity> {
-    repo: IReactiveRepository<T>;
+    repo: IRxRepository<T>;
 
-    constructor(repo: IReactiveRepository<T>) {
+    constructor(repo: IRxRepository<T>) {
         this.repo = repo;
 
     }
@@ -32,76 +33,51 @@ export class Route<T extends Entity> {
 
     getEntities = (req: any) => <Entity[]>req['entities'];
     setEntities = (req: Request, res: Response, next: NextFunction) => {
-        this.repo.getAll().onValue(entities => {
+        this.repo.getAll().subscribe(entities => {
             (req as any)['entities'] = entities;
             next();
         });
     };
 
     getAll = (req: Request, res: Response) => {
-        this.repo.getAll().onValue(entities => {
+        this.repo.getAll().subscribe(entities => {
             return res.status(200).json(entities);
         })
     };
 
     create = (req: Request, res: Response) => {  //one or more
-        let stream: EventStream<any, any> = Array.isArray(req.body) ?
-            this.repo.addMany(req.body)
-            : this.repo.add(req.body);
-        stream.onValue(e => res.status(201).json(req.body)); ``
+         Array.isArray(req.body) ?
+              this.repo.addMany(req.body).subscribe(NodeUtils.writeResponse(res, 201), NodeUtils.writeError(res))
+            : this.repo.add(req.body).subscribe(NodeUtils.writeResponse(res, 201), NodeUtils.writeError(res));
     };
 
     getAllBy = (req: Request, res: Response) => {
-        let query = req.query; ``
-        let stream = this.repo.getAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo));
-        stream.onValue(v => res.status(200).json(v));
-        stream.onError(e => res.status(500).send(e));
+        let query = req.query;
+        this.repo.getAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo))
+            .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
+
     };
 
     deleteAllBy = (req: Request, res: Response) => {
         let query = req.query;
-        let stream = this.repo.removeAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo));
-        stream.onValue(v => res.status(200).json(v));
-        stream.onError(e => res.status(500).send(e));
+        this.repo.removeAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo))
+        .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
     };
 
     getById = (req: Request, res: Response)  => {
-        // let id = req.params.id;
-        // let maybeEntity = EntityQuery.tryGetById(this.getEntities(req), id);
-        // maybeEntity.caseOf({
-        //     just: entity=> res.status(200).json(entity),
-        //     nothing: () => res.sendStatus(404)
-        // });
-        //
-        let sendEntity = e =>
-            res.status(200).json(e);
-
-        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, sendEntity);
+        let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, NodeUtils.writeResponse(res));
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req)
     };
 
     update = (req: Request, res: Response) => {
-        let updateFromRepo = (e:T) => {
-            let stream = this.repo.update(req.body);
-            stream.onValue((e) =>
-                res.status(200).json(e));
-            stream.onError(e => res.status(500).send(e));
-        };
-
+        let updateFromRepo = (e:T) => this.repo.update(req.body).subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
         let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, updateFromRepo);
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req);
     };
 
 
     delete = (req: Request, res: Response) => {
-        let deleteFromRepo = (e:T) => {
-            let stream = this.repo.remove(e);
-            stream.onValue((e) =>{
-                res.status(200).json(e);
-                return Bacon.End;
-        });
-            stream.onError(e => res.status(500).send(e));
-        };
+        let deleteFromRepo = (e:T) => this.repo.remove(e).subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
         let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, deleteFromRepo);
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req);
     };
@@ -115,7 +91,6 @@ export class Route<T extends Entity> {
             },
             nothing: () => {
                 res.sendStatus(404);
-
             }
         });
     };
@@ -126,60 +101,6 @@ export class Route<T extends Entity> {
     };
 
 }
-
-export function routerFor<T extends Entity>(repo:IReactiveRepository<T>, fromJSON:(json:any)=>T) : Router{
-    let router = Router();
-    let getEntitities = (req:any)=> <Entity[]>req['entities'];
-
-    router.route("/")
-        .get((req, res)=>
-            repo.getAll().onValue(entities=> {
-                return res.status(200).json(entities);
-            })
-        )
-        .post((req, res)=>{
-            let newEntity = fromJSON(req.body);
-            repo.add(newEntity)
-                .onValue(e=>res.status(201).json(newEntity));
-        });
-
-    router.route("/:id")
-        .all((req, res, next)=>{
-            repo.getAll().onValue(entities=> {
-                EntityQuery.tryGetById(entities, req.params.id)
-                    .caseOf({
-                        just: e => {
-                            (req as any)['entities'] = entities;
-                            next();
-                        },
-                        nothing: () => {
-                            res.sendStatus(404);
-                        }
-                });
-            });
-        })
-        .get((req,res)=>{
-            let id = req.params.id;
-            let entity = EntityQuery.getById(getEntitities(req), id) as T;
-            res.status(200).json(entity);
-        })
-        .put((req,res)=>{
-            let updatedEntity = fromJSON(req.body);
-            repo.update(updatedEntity).onValue((e)=>
-                res.status(200).json(e));
-
-        })
-        .options(NodeUtils.okOptions)
-        .delete((req, res)=>{
-            let id = req.params.id;
-            let entity = EntityQuery.getById(getEntitities(req), id) as T;
-            repo.remove(entity).onValue(()=>res.sendStatus(200));
-
-        });
-    return router;
-}
-
-
 
 
 

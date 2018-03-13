@@ -3,6 +3,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var _ = require("underscore");
 var uuid = require("uuid");
 var TsMonad = require("tsmonad");
+var Bacon = require("baconjs");
+var Rx = require("rxjs/Rx");
+var RXUtils = /** @class */ (function () {
+    function RXUtils() {
+    }
+    RXUtils.fromStream = function (stream) {
+        return Rx.Observable.create(function (observer) {
+            stream.onValue(function (v) { return observer.next(v); });
+            stream.onEnd(function () { return observer.complete(); });
+            stream.onError(function (e) { return observer.error(e); });
+        });
+    };
+    RXUtils.toStream = function (observable) {
+        var bus = new Bacon.Bus();
+        observable.subscribe(function (v) { return bus.push(v); }, function (e) { return bus.error(e); }, function () { return bus.end(); });
+        return bus;
+    };
+    return RXUtils;
+}());
+exports.RXUtils = RXUtils;
 var MonadUtils = /** @class */ (function () {
     function MonadUtils() {
     }

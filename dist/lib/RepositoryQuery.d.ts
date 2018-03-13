@@ -8,7 +8,7 @@ export declare class RepositoryQuery {
     static isMongo<T extends Entity>(repo: IReactiveRepository<T>): any;
     static toMongoQuery(query: object): object;
     static toInMemoryRepo(query: object): (e: Entity) => boolean;
-    static fromQueryStringTo<T extends Entity>(query: object, repo: IReactiveRepository<T>): object;
-    static decideImpl<T extends Entity>(mongo: any, inMemory: any, repo: IReactiveRepository<T>): any;
+    static fromQueryStringTo<T extends Entity>(query: object, repo: any): object;
+    static decideImpl<T extends Entity>(mongo: any, inMemory: any, repo: any): any;
     static decideImplIcludingAPI<T extends Entity>(mongo: any, api: any, inMemory: any, repo: IReactiveRepository<T>): any;
 }

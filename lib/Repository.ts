@@ -1,10 +1,12 @@
 import * as Bacon from "baconjs";
 import {Response} from 'node-fetch';
 import * as TsMonad from 'tsmonad';
-import {DateUtils, MonadUtils, Period} from "./Utils";
+import {DateUtils, MonadUtils, Period, RXUtils} from "./Utils";
 import {Entity } from "./Entity";
 import * as querystring from "querystring";
 import {EntityQuery} from "./EntityQuery";
+import * as Rx from "rxjs/Rx";
+import EventStream = Bacon.EventStream;
 
 export interface IRepository<T extends Entity>{
     add : (value:T) => void;
@@ -49,7 +51,7 @@ export class APIRepository<T extends Entity> implements IReactiveRepository<T>{
         return this.requestHelper.makeRequest(this.endPoint, 'post', entity, this.onError.bind(this)).map(this.fromJSON);
     }
     addMany(entities:T[]){
-        return this.requestHelper.makeRequest(this.endPoint, 'post', entities, this.onError.bind(this)).map(val=> val.map((v:T[])=>this.fromJSON));
+        return this.requestHelper.makeRequest(this.endPoint, 'post', entities, this.onError.bind(this));
     }
 
     update(entity:T){
@@ -131,7 +133,69 @@ export class InMemoryRepository<T extends Entity> implements IRepository<T>{
     toReactiveRepository(){
         return new SyncReactiveRepository(this);
     }
+
+    toRxRepository() {
+        return new SyncRxRepository(this);
+    }
 }
+
+export class SyncRxRepository<T extends Entity> implements  IRxRepository<T> {
+    repo:IRepository<T>;
+    constructor(repo:IRepository<T>){
+        this.repo = repo;
+    }
+
+    add(e: T){
+        this.repo.add(e);
+        return Rx.Observable.from([e]);
+    }
+    addMany(entities:T[]){
+        this.repo.addMany(entities);
+        return Rx.Observable.from([entities])
+    }
+    remove(e:T){
+        this.repo.remove(e);
+        return Rx.Observable.from([]);
+    }
+    removeAll(){
+        this.repo.removeAll();
+        return Rx.Observable.from([]);
+    }
+    removeAllBy(query:any){
+        this.repo.removeAllBy(query);
+        return Rx.Observable.from([]);
+    }
+
+    update(e:T){
+        this.repo.update(e);
+        return Rx.Observable.from([e]);
+    }
+    updateAll(e:T[]){
+        this.repo.updateAll(e);
+        return Rx.Observable.from([e]);
+    }
+
+    getAll() {
+        let elems =  this.repo.getAll();
+        return Rx.Observable.from([elems]);
+    }
+
+    getAllBy(query:any) {
+        let elems =<T[]> this.repo.getAllBy(query);
+        return Rx.Observable.from([elems]);
+    }
+    getById(id:string){
+        return Rx.Observable.from([this.repo.getById(id)]);
+    }
+    getOneBy(query:any){
+        return Rx.Observable.from([this.repo.getOneBy(query)]);
+    }
+
+    asInMemoryRepository(){
+        return this.repo as InMemoryRepository<T>;
+    }
+}
+
 
 export class SyncReactiveRepository<T extends Entity> implements IReactiveRepository<T> {
     repo:IRepository<T>;
@@ -206,4 +270,63 @@ export interface IReactiveRepository<T extends Entity>{
 
 }
 
+
+export class RxFromReactiveRepository<T extends Entity> implements IRxRepository<T> {
+    repo : IReactiveRepository<T>;
+
+    constructor(repo:IReactiveRepository<T>){
+        this.repo = repo;
+    }
+
+    add(e: T) {
+        return RXUtils.fromStream(this.repo.add(e));
+    }
+    addMany(entities:T[]){
+        return RXUtils.fromStream(this.repo.addMany(entities));
+    }
+    remove(e:T){
+        return RXUtils.fromStream(this.repo.remove(e));
+    }
+    removeAll(){
+        return RXUtils.fromStream(this.repo.removeAll());
+    }
+    removeAllBy(query:any){
+        return RXUtils.fromStream(this.repo.removeAllBy(query));
+    }
+
+    update(e:T){
+        return RXUtils.fromStream(this.repo.update(e));
+    }
+    updateAll(e:T[]){
+        return RXUtils.fromStream(this.repo.updateAll(e));
+    }
+
+    getAll() {
+        return RXUtils.fromStream(this.repo.getAll());
+    }
+
+    getAllBy(query:any) {
+        return RXUtils.fromStream(this.repo.getAllBy(query));
+    }
+    getById(id:string){
+        return RXUtils.fromStream(this.repo.getById(id));;
+    }
+    getOneBy(query:any){
+        return RXUtils.fromStream(this.repo.getOneBy(query));
+    }
+}
+
+export interface IRxRepository <T extends Entity> {
+    add : (value:T) => Rx.Observable<T>;
+    addMany : (value:T[]) => Rx.Observable<T[]>;
+    update : (value:T) => Rx.Observable<T>;
+    updateAll : (value:T[]) => Rx.Observable<T[]>;
+    remove : (value:T) => Rx.Observable<any>;
+    removeAllBy: (query:any) => Rx.Observable<any>;
+    removeAll: ()=> Rx.Observable<T[]>;
+    getAll: ()=> Rx.Observable<T[]>;
+    getAllBy: (query:any)=> Rx.Observable<T[]>;
+    getById : (id:string) => Rx.Observable<TsMonad.Maybe<T>>;
+    getOneBy : (query:any) => Rx.Observable<TsMonad.Maybe<T>>;
+}
 

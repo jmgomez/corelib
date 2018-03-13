@@ -2,8 +2,28 @@ import * as _ from "underscore";
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 import * as Bacon from 'baconjs'
+import * as Rx from "rxjs/Rx";
+import EventStream = Bacon.EventStream;
 
 
+export class RXUtils {
+    static fromStream <T>(stream:EventStream<any, T>) : Rx.Observable<T>{
+        return Rx.Observable.create((observer:Rx.Subject<T>) => {
+            stream.onValue(v=>observer.next(v));
+            stream.onEnd(()=>observer.complete())
+            stream.onError(e=> observer.error(e))
+        });
+    }
+
+    static toStream<T>(observable:Rx.Observable<T>) : EventStream<any, T>{
+        let bus = new Bacon.Bus<any, T>();
+        observable.subscribe(v=>bus.push(v), e=>bus.error(e), ()=>bus.end())
+        return bus;
+
+
+    }
+
+}
 export class MonadUtils {
     public static Ignore() {
     }

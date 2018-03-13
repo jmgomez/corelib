@@ -15,7 +15,7 @@ describe("Server CRUD", function () {
     before(function () {
         apiRepo = new Repository_1.APIRepository(serverEndPoint + "foo/", Mappers_1.fromJSON, ReqHelper_1.RequestHelperNodeImpl);
         server = new Server_1.Server(9000);
-        repo = new Repository_1.InMemoryRepository([]).toReactiveRepository();
+        repo = new Repository_1.InMemoryRepository([]).toRxRepository();
         var route = new Route_1.Route(repo);
         server.addRoute("/foo", route);
         server.start();

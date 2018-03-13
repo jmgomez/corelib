@@ -1,5 +1,11 @@
 import * as TsMonad from "tsmonad";
 import * as Bacon from 'baconjs';
+import * as Rx from "rxjs/Rx";
+import EventStream = Bacon.EventStream;
+export declare class RXUtils {
+    static fromStream<T>(stream: EventStream<any, T>): Rx.Observable<T>;
+    static toStream<T>(observable: Rx.Observable<T>): EventStream<any, T>;
+}
 export declare class MonadUtils {
     static Ignore(): void;
     static CreateMaybeFromNullable<T>(value?: T): TsMonad.Maybe<T>;
