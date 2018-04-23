@@ -1,4 +1,5 @@
-import {IReactiveRepository, IRepository} from "../Repository";
+import {IReactiveRepository, IRepository, IRxRepository} from "../Repository";
+import * as Rx from "rxjs/Rx";
 import * as TsMonad from 'tsmonad';
 import * as fs from "fs";
 import {connect, Db, MongoClient} from "mongodb";
@@ -83,9 +84,96 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
 
 }
 
+export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
+    fromJSON : (json:any)=>T;
+    collection : string;
+    db : Db;
 
 
-export class MongoRepository<T extends Entity> implements IReactiveRepository<T> {
+    constructor(db:Db, collection:string, fromJSON:(json:any)=>T){
+        this.collection = collection;
+        this.fromJSON = fromJSON;
+        this.db = db;
+    }
+
+    toMongoEntity<E extends {id:string}>(e:E){
+        e["_id"] = e.id;
+        delete e.id;
+        return e;
+    }
+    fromMongoToEntity(e:any) : T{
+        e["id"] = e._id;
+        delete e._id;
+        return e;
+    }
+    fromMongoToEntities(e:any[]) : T[]{
+        return e.map(this.fromMongoToEntity);
+    }
+
+
+
+    executeCommandAndCloseConn<E,T>(cmd:(db:Db)=>Rx.Observable<T>){
+        return cmd(this.db);
+    }
+
+    getAll(){
+        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find().map(this.fromMongoToEntity).toArray()) as Rx.Observable<T[]>;
+        return getAllCmd(this.db);
+    }
+
+    getAllBy(query:any, exclude?:any){
+        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity).toArray());
+        return getAllCmd(this.db);
+    }
+
+    add(value: T){
+        let addCmd = (db:Db)=> Rx.Observable.fromPromise(db.collection(this.collection).insertOne(this.toMongoEntity(value)))
+            .map(r=>value); //Checks if there was an error
+        return addCmd(this.db);
+    }
+    addMany(values: T[]){
+        let addCmd = (db:Db)=> Rx.Observable.fromPromise(db.collection(this.collection).insertMany(values.map(v=>this.toMongoEntity(v)))).map(val=>values);
+        return this.executeCommandAndCloseConn(addCmd);
+    }
+
+    update(value: T) {
+        let updateCmd = (db:Db)=>Rx.Observable.fromPromise(db.collection(this.collection).updateOne({_id:value.id}, {$set: this.toMongoEntity(value)}))
+            .map(r=>{
+                console.log(r.result);
+                return value;
+            });
+        //Checks if there was an error
+        return this.executeCommandAndCloseConn(updateCmd);
+    }
+
+    getById(id: string) { //MAYBE THIS WILL CAUSE SOME PROBLEMS
+        let findOne = (db:Db)=> Rx.Observable.fromPromise(db.collection(this.collection).findOne({_id:id}));
+        return this.executeCommandAndCloseConn(findOne).map(e=>MonadUtils.CreateMaybeFromNullable(e));
+    }
+
+    getOneBy(query: any) {
+        return this.getAllBy(query).map(results=>MonadUtils.CreateMaybeFromFirstElementOfAnArray(results))
+        // let findOne = (db:Db)=> Bacon.fromPromise(db.collection(this.collection).findOne(query));
+        // console.log(query, "Sacando uno")
+        // return this.executeCommandAndCloseConn(findOne).map(e=>MonadUtils.CreateMaybeFromFirstElementOfAnArray(e));
+    }
+
+    remove(value: T) : Rx.Observable<any> {
+        let removeCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).deleteOne({_id:value.id}));
+        return removeCmd(this.db)
+    }
+
+    updateAll: (value: T[]) => Rx.Observable<T[]>;
+
+    removeAllBy(query:any) : Rx.Observable<any> {
+        let removeCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).deleteMany(query));
+        return this.executeCommandAndCloseConn(removeCmd);
+    }
+    removeAll: () => Rx.Observable<any>;
+}
+
+
+export class ReactiveMongoRepository<T extends Entity> implements IReactiveRepository<T> {
     fromJSON : (json:any)=>T;
     collection : string;
     db : Db;

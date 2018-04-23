@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var Rx = require("rxjs/Rx");
 var fs = require("fs");
 var Bacon = require("baconjs");
 var EntityQuery_1 = require("../EntityQuery");
@@ -90,28 +91,28 @@ var MongoRepository = /** @class */ (function () {
     };
     MongoRepository.prototype.getAll = function () {
         var _this = this;
-        var getAllCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).find().map(_this.fromMongoToEntity).toArray()); };
-        return this.executeCommandAndCloseConn(getAllCmd);
+        var getAllCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).find().map(_this.fromMongoToEntity).toArray()); };
+        return getAllCmd(this.db);
     };
     MongoRepository.prototype.getAllBy = function (query, exclude) {
         var _this = this;
-        var getAllCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).find(query, exclude).map(_this.fromMongoToEntity).toArray()); };
-        return this.executeCommandAndCloseConn(getAllCmd);
+        var getAllCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).find(query, exclude).map(_this.fromMongoToEntity).toArray()); };
+        return getAllCmd(this.db);
     };
     MongoRepository.prototype.add = function (value) {
         var _this = this;
-        var addCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).insertOne(_this.toMongoEntity(value)))
+        var addCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).insertOne(_this.toMongoEntity(value)))
             .map(function (r) { return value; }); }; //Checks if there was an error
-        return this.executeCommandAndCloseConn(addCmd);
+        return addCmd(this.db);
     };
     MongoRepository.prototype.addMany = function (values) {
         var _this = this;
-        var addCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).insertMany(values.map(function (v) { return _this.toMongoEntity(v); }))).map(function (val) { return values; }); };
+        var addCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).insertMany(values.map(function (v) { return _this.toMongoEntity(v); }))).map(function (val) { return values; }); };
         return this.executeCommandAndCloseConn(addCmd);
     };
     MongoRepository.prototype.update = function (value) {
         var _this = this;
-        var updateCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).updateOne({ _id: value.id }, { $set: _this.toMongoEntity(value) }))
+        var updateCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).updateOne({ _id: value.id }, { $set: _this.toMongoEntity(value) }))
             .map(function (r) {
             console.log(r.result);
             return value;
@@ -121,7 +122,7 @@ var MongoRepository = /** @class */ (function () {
     };
     MongoRepository.prototype.getById = function (id) {
         var _this = this;
-        var findOne = function (db) { return Bacon.fromPromise(db.collection(_this.collection).findOne({ _id: id })); };
+        var findOne = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).findOne({ _id: id })); };
         return this.executeCommandAndCloseConn(findOne).map(function (e) { return Utils_1.MonadUtils.CreateMaybeFromNullable(e); });
     };
     MongoRepository.prototype.getOneBy = function (query) {
@@ -132,15 +133,92 @@ var MongoRepository = /** @class */ (function () {
     };
     MongoRepository.prototype.remove = function (value) {
         var _this = this;
-        var removeCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).deleteOne({ _id: value.id })); };
-        return this.executeCommandAndCloseConn(removeCmd);
+        var removeCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).deleteOne({ _id: value.id })); };
+        return removeCmd(this.db);
     };
     MongoRepository.prototype.removeAllBy = function (query) {
         var _this = this;
-        var removeCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).deleteMany(query)); };
+        var removeCmd = function (db) { return Rx.Observable.fromPromise(db.collection(_this.collection).deleteMany(query)); };
         return this.executeCommandAndCloseConn(removeCmd);
     };
     return MongoRepository;
 }());
 exports.MongoRepository = MongoRepository;
+var ReactiveMongoRepository = /** @class */ (function () {
+    function ReactiveMongoRepository(db, collection, fromJSON) {
+        this.collection = collection;
+        this.fromJSON = fromJSON;
+        this.db = db;
+    }
+    ReactiveMongoRepository.prototype.toMongoEntity = function (e) {
+        e["_id"] = e.id;
+        delete e.id;
+        return e;
+    };
+    ReactiveMongoRepository.prototype.fromMongoToEntity = function (e) {
+        e["id"] = e._id;
+        delete e._id;
+        return e;
+    };
+    ReactiveMongoRepository.prototype.fromMongoToEntities = function (e) {
+        return e.map(this.fromMongoToEntity);
+    };
+    ReactiveMongoRepository.prototype.executeCommandAndCloseConn = function (cmd) {
+        return cmd(this.db);
+    };
+    ReactiveMongoRepository.prototype.getAll = function () {
+        var _this = this;
+        var getAllCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).find().map(_this.fromMongoToEntity).toArray()); };
+        return this.executeCommandAndCloseConn(getAllCmd);
+    };
+    ReactiveMongoRepository.prototype.getAllBy = function (query, exclude) {
+        var _this = this;
+        var getAllCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).find(query, exclude).map(_this.fromMongoToEntity).toArray()); };
+        return this.executeCommandAndCloseConn(getAllCmd);
+    };
+    ReactiveMongoRepository.prototype.add = function (value) {
+        var _this = this;
+        var addCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).insertOne(_this.toMongoEntity(value)))
+            .map(function (r) { return value; }); }; //Checks if there was an error
+        return this.executeCommandAndCloseConn(addCmd);
+    };
+    ReactiveMongoRepository.prototype.addMany = function (values) {
+        var _this = this;
+        var addCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).insertMany(values.map(function (v) { return _this.toMongoEntity(v); }))).map(function (val) { return values; }); };
+        return this.executeCommandAndCloseConn(addCmd);
+    };
+    ReactiveMongoRepository.prototype.update = function (value) {
+        var _this = this;
+        var updateCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).updateOne({ _id: value.id }, { $set: _this.toMongoEntity(value) }))
+            .map(function (r) {
+            console.log(r.result);
+            return value;
+        }); };
+        //Checks if there was an error
+        return this.executeCommandAndCloseConn(updateCmd);
+    };
+    ReactiveMongoRepository.prototype.getById = function (id) {
+        var _this = this;
+        var findOne = function (db) { return Bacon.fromPromise(db.collection(_this.collection).findOne({ _id: id })); };
+        return this.executeCommandAndCloseConn(findOne).map(function (e) { return Utils_1.MonadUtils.CreateMaybeFromNullable(e); });
+    };
+    ReactiveMongoRepository.prototype.getOneBy = function (query) {
+        return this.getAllBy(query).map(function (results) { return Utils_1.MonadUtils.CreateMaybeFromFirstElementOfAnArray(results); });
+        // let findOne = (db:Db)=> Bacon.fromPromise(db.collection(this.collection).findOne(query));
+        // console.log(query, "Sacando uno")
+        // return this.executeCommandAndCloseConn(findOne).map(e=>MonadUtils.CreateMaybeFromFirstElementOfAnArray(e));
+    };
+    ReactiveMongoRepository.prototype.remove = function (value) {
+        var _this = this;
+        var removeCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).deleteOne({ _id: value.id })); };
+        return this.executeCommandAndCloseConn(removeCmd);
+    };
+    ReactiveMongoRepository.prototype.removeAllBy = function (query) {
+        var _this = this;
+        var removeCmd = function (db) { return Bacon.fromPromise(db.collection(_this.collection).deleteMany(query)); };
+        return this.executeCommandAndCloseConn(removeCmd);
+    };
+    return ReactiveMongoRepository;
+}());
+exports.ReactiveMongoRepository = ReactiveMongoRepository;
 //# sourceMappingURL=ServerRepositories.js.map

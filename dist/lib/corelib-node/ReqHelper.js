@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Bacon = require("baconjs");
+var Rx = require("rxjs");
 var node_fetch_1 = require("node-fetch");
 var RequestHelperNodeImpl = /** @class */ (function () {
     function RequestHelperNodeImpl() {
@@ -13,17 +13,7 @@ var RequestHelperNodeImpl = /** @class */ (function () {
     RequestHelperNodeImpl.makeRequest = function (url, method, data, onError) {
         method = method ? method : "POST";
         var promise = node_fetch_1.default(this.prepareRequest(url, method, data));
-        promise.catch(function (e) {
-            var r = new node_fetch_1.Response();
-            console.error(e);
-            onError(r);
-        });
-        promise.then(function (r) {
-            if (!r.ok && onError)
-                onError(r);
-        });
-        return Bacon.fromPromise(promise)
-            .flatMap(function (res) { return Bacon.fromPromise(res.json()); });
+        return Rx.Observable.fromPromise(promise.then(function (res) { return res.json(); }).catch(function (e) { return onError(e); }));
     };
     RequestHelperNodeImpl.headers = function () {
         return {

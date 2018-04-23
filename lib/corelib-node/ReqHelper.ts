@@ -1,4 +1,5 @@
-import * as Bacon from "baconjs";
+
+import * as Rx from "rxjs";
 import fetch, {Request, Response} from "node-fetch";
 
 export class RequestHelperNodeImpl {
@@ -11,19 +12,9 @@ export class RequestHelperNodeImpl {
 
     static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) {
         method = method ? method : "POST";
-        let promise = fetch(this.prepareRequest(url, method, data));
-        promise.catch(e=>{
-            let r = new Response();
-            console.error(e);
-            onError(r);
-        });
-        promise.then(r => {
-            if(!r.ok && onError)
-                onError(r);
-        });
 
-        return Bacon.fromPromise(promise)
-            .flatMap(res => Bacon.fromPromise(res.json()));
+        let promise = fetch(this.prepareRequest(url, method, data));
+        return Rx.Observable.fromPromise(promise.then(res=>res.json()).catch(e=> onError(e)))
 
     }
 

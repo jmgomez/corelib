@@ -24,7 +24,7 @@ export class Route<T extends Entity> {
 
     configureRouter<T extends Entity>(): Router {
         let router = Router();
-        router.route("/").get(this.getAll).post(this.create).options(NodeUtils.okOptions);
+        router.route("/").get(this.getAll).post(this.create).delete(this.deleteAll).options(NodeUtils.okOptions);
         router.route("/deleteall").get(this.deleteAllBy).options(NodeUtils.okOptions);
         router.route("/getallby").get(this.getAllBy).options(NodeUtils.okOptions);
         router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils.okOptions);
@@ -45,6 +45,12 @@ export class Route<T extends Entity> {
         })
     };
 
+    deleteAll = (req: Request, res: Response) => {
+        this.repo.removeAll().subscribe(entities => {
+            return res.status(200);
+        })
+    };
+
     create = (req: Request, res: Response) => {  //one or more
          Array.isArray(req.body) ?
               this.repo.addMany(req.body).subscribe(NodeUtils.writeResponse(res, 201), NodeUtils.writeError(res))
@@ -57,6 +63,7 @@ export class Route<T extends Entity> {
             .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
 
     };
+
 
     deleteAllBy = (req: Request, res: Response) => {
         let query = req.query;

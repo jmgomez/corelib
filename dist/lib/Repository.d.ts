@@ -17,25 +17,24 @@ export interface IRepository<T extends Entity> {
     getOneBy: (query: any) => TsMonad.Maybe<T>;
 }
 export declare type ReqHelper = {
-    makeRequest: (url: string, method: string, data?: any, onError?: (r: Response) => void) => Bacon.EventStream<any, any>;
+    makeRequest: (url: string, method: string, data?: any, onError?: (r: Response) => void) => Rx.Observable<any>;
 };
-export declare class APIRepository<T extends Entity> implements IReactiveRepository<T> {
+export declare class APIRepository<T extends Entity> implements IRxRepository<T> {
     endPoint: string;
-    fromJSON: (json: any) => T;
     private requestHelper;
     onError(r: Response): void;
-    constructor(endPoint: string, fromJSON: (json: any) => T, reqHelper: ReqHelper);
-    getAll(): Bacon.EventStream<any, any>;
-    add(entity: T): Bacon.EventStream<any, T>;
-    addMany(entities: T[]): Bacon.EventStream<any, any>;
-    update(entity: T): Bacon.EventStream<any, T>;
-    remove(entity: T): Bacon.EventStream<any, any>;
-    getById(id: string): Bacon.EventStream<any, TsMonad.Maybe<any>>;
-    removeAllBy(query: any): Bacon.EventStream<{}, any>;
-    getAllBy(query: any): Bacon.EventStream<any, T[]>;
-    updateAll: (value: T[]) => Bacon.EventStream<any, T[]>;
-    removeAll: () => Bacon.EventStream<any, T[]>;
-    getOneBy: () => Bacon.EventStream<any, TsMonad.Maybe<T>>;
+    constructor(endPoint: string, reqHelper: ReqHelper);
+    getAll(): Rx.Observable<any>;
+    add(entity: T): Rx.Observable<any>;
+    addMany(entities: T[]): Rx.Observable<any>;
+    update(entity: T): Rx.Observable<any>;
+    remove(entity: T): Rx.Observable<any>;
+    getById(id: string): Rx.Observable<TsMonad.Maybe<any>>;
+    removeAllBy(query: any): Rx.Observable<any[]>;
+    getAllBy(query: any): Rx.Observable<any>;
+    updateAll: (value: T[]) => Rx.Observable<T[]>;
+    removeAll: () => Rx.Observable<any>;
+    getOneBy: () => Rx.Observable<TsMonad.Maybe<T>>;
 }
 export declare class InMemoryRepository<T extends Entity> implements IRepository<T> {
     elems: T[];
@@ -99,6 +98,22 @@ export interface IReactiveRepository<T extends Entity> {
     getById: (id: string) => Bacon.EventStream<any, TsMonad.Maybe<T>>;
     getOneBy: (query: any) => Bacon.EventStream<any, TsMonad.Maybe<T>>;
 }
+export declare class ReactiveFromRxRepository<T extends Entity> implements IReactiveRepository<T> {
+    repo: IRxRepository<T>;
+    constructor(repo: IRxRepository<T>);
+    add(e: T): Bacon.EventStream<any, T>;
+    addMany(entities: T[]): Bacon.EventStream<any, T[]>;
+    remove(e: T): Bacon.EventStream<any, any>;
+    removeAll(): Bacon.EventStream<any, T[]>;
+    removeAllBy(query: any): Bacon.EventStream<any, any>;
+    update(e: T): Bacon.EventStream<any, T>;
+    updateAll(e: T[]): Bacon.EventStream<any, T[]>;
+    getAll(): Bacon.EventStream<any, T[]>;
+    getAllBy(query: any): Bacon.EventStream<any, T[]>;
+    getById(id: string): Bacon.EventStream<any, TsMonad.Maybe<T>>;
+    getOneBy(query: any): Bacon.EventStream<any, TsMonad.Maybe<T>>;
+    static create<T extends Entity>(reactiveRepo: IRxRepository<T>): ReactiveFromRxRepository<T>;
+}
 export declare class RxFromReactiveRepository<T extends Entity> implements IRxRepository<T> {
     repo: IReactiveRepository<T>;
     constructor(repo: IReactiveRepository<T>);
@@ -113,6 +128,7 @@ export declare class RxFromReactiveRepository<T extends Entity> implements IRxRe
     getAllBy(query: any): Rx.Observable<T[]>;
     getById(id: string): Rx.Observable<TsMonad.Maybe<T>>;
     getOneBy(query: any): Rx.Observable<TsMonad.Maybe<T>>;
+    static create<T extends Entity>(reactiveRepo: IReactiveRepository<T>): RxFromReactiveRepository<T>;
 }
 export interface IRxRepository<T extends Entity> {
     add: (value: T) => Rx.Observable<T>;

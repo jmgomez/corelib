@@ -20,6 +20,11 @@ var Route = /** @class */ (function () {
                 return res.status(200).json(entities);
             });
         };
+        this.deleteAll = function (req, res) {
+            _this.repo.removeAll().subscribe(function (entities) {
+                return res.status(200);
+            });
+        };
         this.create = function (req, res) {
             Array.isArray(req.body) ?
                 _this.repo.addMany(req.body).subscribe(NodeUtils_1.NodeUtils.writeResponse(res, 201), NodeUtils_1.NodeUtils.writeError(res))
@@ -67,7 +72,7 @@ var Route = /** @class */ (function () {
     }
     Route.prototype.configureRouter = function () {
         var router = express_1.Router();
-        router.route("/").get(this.getAll).post(this.create).options(NodeUtils_1.NodeUtils.okOptions);
+        router.route("/").get(this.getAll).post(this.create).delete(this.deleteAll).options(NodeUtils_1.NodeUtils.okOptions);
         router.route("/deleteall").get(this.deleteAllBy).options(NodeUtils_1.NodeUtils.okOptions);
         router.route("/getallby").get(this.getAllBy).options(NodeUtils_1.NodeUtils.okOptions);
         router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils_1.NodeUtils.okOptions);

@@ -8,6 +8,7 @@ export declare class Route<T extends Entity> {
     getEntities: (req: any) => Entity[];
     setEntities: (req: Request, res: Response, next: NextFunction) => void;
     getAll: (req: Request, res: Response) => void;
+    deleteAll: (req: Request, res: Response) => void;
     create: (req: Request, res: Response) => void;
     getAllBy: (req: Request, res: Response) => void;
     deleteAllBy: (req: Request, res: Response) => void;

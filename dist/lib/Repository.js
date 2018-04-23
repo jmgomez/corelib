@@ -5,27 +5,30 @@ var Utils_1 = require("./Utils");
 var EntityQuery_1 = require("./EntityQuery");
 var Rx = require("rxjs/Rx");
 var APIRepository = /** @class */ (function () {
-    function APIRepository(endPoint, fromJSON, reqHelper) {
+    function APIRepository(endPoint, reqHelper) {
+        var _this = this;
+        this.removeAll = function () {
+            return _this.requestHelper.makeRequest(_this.endPoint, 'delete', _this.onError.bind(_this));
+        };
         this.endPoint = endPoint;
-        this.fromJSON = fromJSON;
         this.requestHelper = reqHelper;
     }
     APIRepository.prototype.onError = function (r) {
         console.error(r);
+        console.error(r);
     };
     APIRepository.prototype.getAll = function () {
-        var _this = this;
-        return this.requestHelper.makeRequest(this.endPoint, 'get', this.onError.bind(this)).map(function (vals) { return vals.map(_this.fromJSON); });
+        return this.requestHelper.makeRequest(this.endPoint, 'get', this.onError.bind(this));
     };
     APIRepository.prototype.add = function (entity) {
-        return this.requestHelper.makeRequest(this.endPoint, 'post', entity, this.onError.bind(this)).map(this.fromJSON);
+        return this.requestHelper.makeRequest(this.endPoint, 'post', entity, this.onError.bind(this));
     };
     APIRepository.prototype.addMany = function (entities) {
         return this.requestHelper.makeRequest(this.endPoint, 'post', entities, this.onError.bind(this));
     };
     APIRepository.prototype.update = function (entity) {
         var path = this.endPoint + entity.id;
-        return this.requestHelper.makeRequest(path, 'put', entity, this.onError.bind(this)).map(this.fromJSON);
+        return this.requestHelper.makeRequest(path, 'put', entity, this.onError.bind(this));
     };
     APIRepository.prototype.remove = function (entity) {
         var path = this.endPoint + entity.id;
@@ -37,7 +40,7 @@ var APIRepository = /** @class */ (function () {
             .map(function (val) { return Utils_1.MonadUtils.CreateMaybeFromNullable(val); });
     };
     APIRepository.prototype.removeAllBy = function (query) {
-        return Bacon.fromArray([]);
+        return Rx.Observable.of([]);
     };
     APIRepository.prototype.getAllBy = function (query) {
         var path = this.endPoint + "getallby" + query;
@@ -200,6 +203,50 @@ var SyncReactiveRepository = /** @class */ (function () {
     return SyncReactiveRepository;
 }());
 exports.SyncReactiveRepository = SyncReactiveRepository;
+var ReactiveFromRxRepository = /** @class */ (function () {
+    function ReactiveFromRxRepository(repo) {
+        this.repo = repo;
+    }
+    ReactiveFromRxRepository.prototype.add = function (e) {
+        return Utils_1.RXUtils.toStream(this.repo.add(e));
+    };
+    ReactiveFromRxRepository.prototype.addMany = function (entities) {
+        return Utils_1.RXUtils.toStream(this.repo.addMany(entities));
+    };
+    ReactiveFromRxRepository.prototype.remove = function (e) {
+        return Utils_1.RXUtils.toStream(this.repo.remove(e));
+    };
+    ReactiveFromRxRepository.prototype.removeAll = function () {
+        return Utils_1.RXUtils.toStream(this.repo.removeAll());
+    };
+    ReactiveFromRxRepository.prototype.removeAllBy = function (query) {
+        return Utils_1.RXUtils.toStream(this.repo.removeAllBy(query));
+    };
+    ReactiveFromRxRepository.prototype.update = function (e) {
+        return Utils_1.RXUtils.toStream(this.repo.update(e));
+    };
+    ReactiveFromRxRepository.prototype.updateAll = function (e) {
+        return Utils_1.RXUtils.toStream(this.repo.updateAll(e));
+    };
+    ReactiveFromRxRepository.prototype.getAll = function () {
+        return Utils_1.RXUtils.toStream(this.repo.getAll());
+    };
+    ReactiveFromRxRepository.prototype.getAllBy = function (query) {
+        return Utils_1.RXUtils.toStream(this.repo.getAllBy(query));
+    };
+    ReactiveFromRxRepository.prototype.getById = function (id) {
+        return Utils_1.RXUtils.toStream(this.repo.getById(id));
+        ;
+    };
+    ReactiveFromRxRepository.prototype.getOneBy = function (query) {
+        return Utils_1.RXUtils.toStream(this.repo.getOneBy(query));
+    };
+    ReactiveFromRxRepository.create = function (reactiveRepo) {
+        return new ReactiveFromRxRepository(reactiveRepo);
+    };
+    return ReactiveFromRxRepository;
+}());
+exports.ReactiveFromRxRepository = ReactiveFromRxRepository;
 var RxFromReactiveRepository = /** @class */ (function () {
     function RxFromReactiveRepository(repo) {
         this.repo = repo;
@@ -237,6 +284,9 @@ var RxFromReactiveRepository = /** @class */ (function () {
     };
     RxFromReactiveRepository.prototype.getOneBy = function (query) {
         return Utils_1.RXUtils.fromStream(this.repo.getOneBy(query));
+    };
+    RxFromReactiveRepository.create = function (reactiveRepo) {
+        return new RxFromReactiveRepository(reactiveRepo);
     };
     return RxFromReactiveRepository;
 }());

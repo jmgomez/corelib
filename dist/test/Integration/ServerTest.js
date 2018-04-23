@@ -4,7 +4,6 @@ var chai_1 = require("chai");
 var Server_1 = require("../../lib/corelib-node/Server");
 var Route_1 = require("../../lib/corelib-node/Route");
 var Repository_1 = require("../../lib/Repository");
-var Mappers_1 = require("../../lib/Mappers");
 var ReqHelper_1 = require("../../lib/corelib-node/ReqHelper");
 var querystring = require("querystring");
 describe("Server CRUD", function () {
@@ -13,7 +12,7 @@ describe("Server CRUD", function () {
     var apiRepo;
     var repo;
     before(function () {
-        apiRepo = new Repository_1.APIRepository(serverEndPoint + "foo/", Mappers_1.fromJSON, ReqHelper_1.RequestHelperNodeImpl);
+        apiRepo = new Repository_1.APIRepository(serverEndPoint + "foo/", ReqHelper_1.RequestHelperNodeImpl);
         server = new Server_1.Server(9000);
         repo = new Repository_1.InMemoryRepository([]).toRxRepository();
         var route = new Route_1.Route(repo);
@@ -25,7 +24,7 @@ describe("Server CRUD", function () {
     });
     it("Should create a new entity", function (done) {
         var foo = { id: "foo", title: "blabla" };
-        apiRepo.add(foo).onValue(function (v) {
+        apiRepo.add(foo).subscribe(function (v) {
             chai_1.expect(foo.title).eq(v.title);
             done();
         });
@@ -34,7 +33,7 @@ describe("Server CRUD", function () {
         var foo = { id: "foo", title: "blabla" };
         repo.asInMemoryRepository().elems = [foo];
         var modifiedText = "lol";
-        apiRepo.update({ id: "foo", title: modifiedText }).onValue(function (v) {
+        apiRepo.update({ id: "foo", title: modifiedText }).subscribe(function (v) {
             chai_1.expect(v.title).eq(modifiedText);
             done();
         });
@@ -43,7 +42,7 @@ describe("Server CRUD", function () {
         var foo = { id: "foo", title: "blabla" };
         repo.asInMemoryRepository().elems = [foo];
         var stream = apiRepo.getById("foo").map(function (f) { return f.value; });
-        stream.onValue(function (v) {
+        stream.subscribe(function (v) {
             chai_1.expect(v.title).eq(foo.title);
             done();
         });
@@ -53,7 +52,7 @@ describe("Server CRUD", function () {
         repo.asInMemoryRepository().elems = foos;
         var query = "?" + querystring.stringify({ title: "query" });
         var stream = apiRepo.getAllBy(query);
-        stream.onValue(function (v) {
+        stream.subscribe(function (v) {
             chai_1.expect(v.length).eq(2);
             done();
         });

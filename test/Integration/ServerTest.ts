@@ -18,7 +18,7 @@ describe("Server CRUD", ()=>{
     let repo : IRxRepository<Foo>;
 
     before(()=>{
-        apiRepo = new APIRepository<Foo>(serverEndPoint+"foo/", fromJSON,  RequestHelperNodeImpl);
+        apiRepo = new APIRepository<Foo>(serverEndPoint+"foo/",  RequestHelperNodeImpl);
         server = new Server(9000);
         repo = new InMemoryRepository<Foo>([]).toRxRepository();
         let route = new Route(repo);
@@ -34,7 +34,7 @@ describe("Server CRUD", ()=>{
     it("Should create a new entity", done => {
         let foo = { id: "foo", title: "blabla" };
 
-        apiRepo.add(foo).onValue(v=>{
+        apiRepo.add(foo).subscribe(v=>{
             expect(foo.title).eq(v.title);
             done();
         });
@@ -49,7 +49,7 @@ describe("Server CRUD", ()=>{
 
         let modifiedText = "lol";
 
-        apiRepo.update({ id: "foo", title: modifiedText }).onValue(v=>{
+        apiRepo.update({ id: "foo", title: modifiedText }).subscribe(v=>{
             expect(v.title).eq(modifiedText);
             done();
         })
@@ -62,7 +62,7 @@ describe("Server CRUD", ()=>{
         (<SyncReactiveRepository<Foo>> (repo as any)).asInMemoryRepository().elems = [foo];
 
         let stream = apiRepo.getById("foo").map((f:any)=>f.value as Foo);
-        stream.onValue((v)=>{
+        stream.subscribe((v)=>{
             expect(v.title).eq(foo.title);
             done();
         })
@@ -73,7 +73,7 @@ describe("Server CRUD", ()=>{
         (<SyncReactiveRepository<Foo>> (repo as any)).asInMemoryRepository().elems = foos;
         let query = "?"+querystring.stringify({title:"query"})
         let stream = apiRepo.getAllBy(query);
-        stream.onValue((v)=>{
+        stream.subscribe((v)=>{
             expect(v.length).eq(2);
             done();
         })

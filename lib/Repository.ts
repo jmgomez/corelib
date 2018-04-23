@@ -23,32 +23,34 @@ export interface IRepository<T extends Entity>{
 }
 
 export type ReqHelper = {
-    makeRequest: (url: string, method: string, data?: any, onError?:(r:Response)=>void) => Bacon.EventStream<any, any>
+    makeRequest: (url: string, method: string, data?: any, onError?:(r:Response)=>void) => Rx.Observable<any>
 }
 
-export class APIRepository<T extends Entity> implements IReactiveRepository<T>{
+
+
+
+
+export class APIRepository<T extends Entity> implements IRxRepository<T>{
 
     endPoint : string;
-    fromJSON:(json:any)=>T;
     private requestHelper: ReqHelper;
 
     onError(r:Response){
        console.error(r);
+       console.error(r);
     }
 
-    constructor(endPoint:string, fromJSON:(json:any)=>T,  reqHelper:ReqHelper){
+    constructor(endPoint:string,  reqHelper:ReqHelper){
         this.endPoint = endPoint;
-        this.fromJSON = fromJSON;
-
         this.requestHelper = reqHelper;
     }
 
     getAll(){
-        return this.requestHelper.makeRequest(this.endPoint, 'get', this.onError.bind(this)).map(vals=>vals.map(this.fromJSON));
+        return this.requestHelper.makeRequest(this.endPoint, 'get', this.onError.bind(this));
     }
 
     add(entity:T){
-        return this.requestHelper.makeRequest(this.endPoint, 'post', entity, this.onError.bind(this)).map(this.fromJSON);
+        return this.requestHelper.makeRequest(this.endPoint, 'post', entity, this.onError.bind(this));
     }
     addMany(entities:T[]){
         return this.requestHelper.makeRequest(this.endPoint, 'post', entities, this.onError.bind(this));
@@ -56,7 +58,7 @@ export class APIRepository<T extends Entity> implements IReactiveRepository<T>{
 
     update(entity:T){
         let path = this.endPoint+entity.id;
-        return this.requestHelper.makeRequest(path, 'put', entity, this.onError.bind(this)).map(this.fromJSON);
+        return this.requestHelper.makeRequest(path, 'put', entity, this.onError.bind(this));
     }
 
     remove(entity:T){
@@ -71,21 +73,23 @@ export class APIRepository<T extends Entity> implements IReactiveRepository<T>{
     }
 
     removeAllBy(query:any) {
-        return Bacon.fromArray([]);
+        return Rx.Observable.of([]);
     }
 
-    getAllBy(query:any) : Bacon.EventStream<any, T[]>{
+    getAllBy(query:any){
         let path = this.endPoint+"getallby"+query;
         return this.requestHelper.makeRequest(path, 'get', {}, this.onError.bind(this))
         // throw new Error("You don't have to query from the API. The server router will handle it. In the future it will be done through GraphQL");
         // return Bacon.fromArray([]);
     }
 
-    updateAll: (value: T[]) => Bacon.EventStream<any, T[]>;
+    updateAll: (value: T[]) => Rx.Observable <T[]>;
 
-    removeAll: () => Bacon.EventStream<any, T[]>;
+    removeAll =() => {
+        return this.requestHelper.makeRequest(this.endPoint, 'delete', this.onError.bind(this));
+    };
 
-    getOneBy: () => Bacon.EventStream<any, TsMonad.Maybe<T>>;
+    getOneBy: () =>  Rx.Observable <TsMonad.Maybe<T>>;
 }
 
 
@@ -270,6 +274,54 @@ export interface IReactiveRepository<T extends Entity>{
 
 }
 
+export class ReactiveFromRxRepository<T extends Entity> implements IReactiveRepository<T> {
+    repo : IRxRepository<T>;
+
+    constructor(repo:IRxRepository<T>){
+        this.repo = repo;
+    }
+
+    add(e: T) {
+        return RXUtils.toStream(this.repo.add(e));
+    }
+    addMany(entities:T[]){
+        return RXUtils.toStream(this.repo.addMany(entities));
+    }
+    remove(e:T){
+        return RXUtils.toStream(this.repo.remove(e));
+    }
+    removeAll(){
+        return RXUtils.toStream(this.repo.removeAll());
+    }
+    removeAllBy(query:any){
+        return RXUtils.toStream(this.repo.removeAllBy(query));
+    }
+
+    update(e:T){
+        return RXUtils.toStream(this.repo.update(e));
+    }
+    updateAll(e:T[]){
+        return RXUtils.toStream(this.repo.updateAll(e));
+    }
+
+    getAll() {
+        return RXUtils.toStream(this.repo.getAll());
+    }
+
+    getAllBy(query:any) {
+        return RXUtils.toStream(this.repo.getAllBy(query));
+    }
+    getById(id:string){
+        return RXUtils.toStream(this.repo.getById(id));;
+    }
+    getOneBy(query:any){
+        return RXUtils.toStream(this.repo.getOneBy(query));
+    }
+
+    static create<T extends Entity>(reactiveRepo:IRxRepository<T>){
+        return new ReactiveFromRxRepository(reactiveRepo);
+    }
+}
 
 export class RxFromReactiveRepository<T extends Entity> implements IRxRepository<T> {
     repo : IReactiveRepository<T>;
@@ -313,6 +365,10 @@ export class RxFromReactiveRepository<T extends Entity> implements IRxRepository
     }
     getOneBy(query:any){
         return RXUtils.fromStream(this.repo.getOneBy(query));
+    }
+
+    static create<T extends Entity>(reactiveRepo:IReactiveRepository<T>){
+        return new RxFromReactiveRepository(reactiveRepo);
     }
 }
 
