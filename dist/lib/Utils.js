@@ -128,8 +128,9 @@ var StringUtils = /** @class */ (function () {
     StringUtils.stringContains = function (str, keyword) {
         if (str === undefined || str === null)
             return false;
-        return str.toLowerCase().search(keyword.toLowerCase()) > -1;
+        return str.toLowerCase().indexOf(keyword.toLowerCase()) > -1;
     };
+    ;
     StringUtils.isNullOrEmpty = function (str) {
         return str == null || str == "";
     };

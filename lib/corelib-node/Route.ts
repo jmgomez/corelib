@@ -61,7 +61,6 @@ export class Route<T extends Entity> {
         let query = req.query;
         this.repo.getAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo))
             .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
-
     };
 
 

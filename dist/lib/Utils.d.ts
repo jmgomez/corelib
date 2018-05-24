@@ -46,7 +46,7 @@ export declare class DateUtils {
     static getDateFromString(d: string): Date;
     static getDateTimeFromString(d: string): Date;
     static getDateAndHoursAsStringITKFormat(date: Date): string;
-    static calculateQuarter(m: number): 1 | 4 | 2 | 3;
+    static calculateQuarter(m: number): 1 | 2 | 4 | 3;
     static getDateAndHoursAsStringJSFormat(date: Date): string;
     static FromITKFormatToJsFormat(date: string): string;
     static getDateWithNDaysFromToday(n: number): Date;

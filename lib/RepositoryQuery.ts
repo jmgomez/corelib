@@ -1,14 +1,14 @@
 
 
 
-import {IReactiveRepository} from './Repository';
+import {IReactiveRepository, IRxRepository} from './Repository';
 import {Entity} from './Entity';
 import * as querystring from 'querystring';
 
 export class RepositoryQuery {
     static names = {MongoRepository:"MongoRepository", APIRepository: "APIRepository"};
 
-    static isMongo<T extends Entity>(repo:IReactiveRepository<T>){
+    static isMongo<T extends Entity>(repo:IRxRepository<T>){
         return repo.constructor["name"].includes("MongoRepository"); //this wont work on the client
     }
 
@@ -49,7 +49,7 @@ export class RepositoryQuery {
         }
     }
 
-    static decideImplIcludingAPI<T extends Entity>(mongo:any,api:any, inMemory:any, repo:IReactiveRepository<T>){
+    static decideImplIcludingAPI<T extends Entity>(mongo:any,api:any, inMemory:any, repo:IRxRepository<T>){
 
         switch (repo.constructor["name"]){
             case this.names.MongoRepository:

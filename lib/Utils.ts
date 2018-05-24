@@ -124,10 +124,12 @@ export class StringUtils {
         }
         return s;
     };
-    public static stringContains(str:string, keyword:string){
+
+    public static stringContains(str: string, keyword: string) {
         if(str === undefined || str === null) return false;
-        return str.toLowerCase().search(keyword.toLowerCase()) > -1;
-    }
+        return str.toLowerCase().indexOf(keyword.toLowerCase()) > -1;
+    };
+
 
     public static isNullOrEmpty(str:string){
         return str == null || str == "";
