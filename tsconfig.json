@@ -1,13 +1,7 @@
 {
+  "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./dist",
-    "strict": false,
-    "lib":["es5", "dom", "es2015.promise"],
-    "types": ["node", "mocha", "chai"],
-    "sourceMap": true,
-    "alwaysStrict": false
+    "outDir": "lib",
+    "rootDir": "src"
   }
 }
