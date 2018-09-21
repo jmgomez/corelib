@@ -30,8 +30,13 @@ export function measureStream<T>(this: PromiseObservable<T>, label: string, repo
 
 
 export function initExtensions(){
-   
     Rx.Observable.prototype.measure = measureStream; 
+    if(!Rx.Observable.prototype.notify)
+        Rx.Observable.prototype.notify =  function<T>(body, error){  
+            let stream: PromiseObservable<T> = this as any;
+            return stream;
+        };
+    Rx.Observable.prototype.notifyWarning = (body, error)=> Rx.Observable.of({});
 }
 
 initExtensions();

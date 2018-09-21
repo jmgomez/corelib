@@ -16,6 +16,7 @@ function measureStream(label, repoCaller) {
 }
 exports.measureStream = measureStream;
 function initExtensions() {
+    console.log("ehhhhh")
     Rx.Observable.prototype.measure = measureStream;
 }
 exports.initExtensions = initExtensions;
