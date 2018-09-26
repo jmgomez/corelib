@@ -209,3 +209,15 @@ export interface IRxRepository <T extends Entity> {
     getOneBy : (query:any) => Rx.Observable<TsMonad.Maybe<T>>;
 }
 
+
+export class UnitRxRepository<T extends Entity> {
+    constructor(private repo : IRxRepository<T>){}
+    
+    updateOrCreate = (value:T)=>
+       this.get(value.id).flatMap(maybeT=> maybeT.caseOf({
+           just: t=> this.repo.update(value),
+           nothing: ()=> this.repo.add(value).catch(e=> this.updateOrCreate(value))
+       }))
+
+    get = (id:string)=>  this.repo.getById(id) ; 
+}

@@ -1,4 +1,4 @@
-import { IRepository, IRxRepository} from "../Repository";
+import { IRepository, IRxRepository, SyncRxRepository} from "../Repository";
 import * as Rx from "rxjs/Rx";
 import * as TsMonad from 'tsmonad';
 import * as fs from "fs";
@@ -72,13 +72,16 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
         return MonadUtils.CreateMaybeFromFirstElementOfAnArray(this.getAllBy(query));
     }
 
+    toRxRepository(){
+        return new SyncRxRepository(this);
+    }
+
     private loadFromFile(){
         if(!fs.existsSync(this.name))
             fs.writeFileSync(this.name, "[]");
         let json = fs.readFileSync(this.name, "UTF-8");
 
         return JSON.parse(json).map(this.fromJSON);
-
     }
 
 }
