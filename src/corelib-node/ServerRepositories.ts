@@ -30,7 +30,6 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
     persist(){
         let json = JSON.stringify(this.entities);
         fs.writeFileSync(this.name, json);
-        console.log("Just wrote in the file");
     }
 
     add(entity: T) {
@@ -65,6 +64,7 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
     }
 
     getById(id:string) : TsMonad.Maybe<T>{
+
         return EntityQuery.tryGetById(this.entities, id);
     }
 

@@ -56,8 +56,8 @@ export declare class SyncRxRepository<T extends Entity> implements IRxRepository
     constructor(repo: IRepository<T>);
     add(e: T): Rx.Observable<T>;
     addMany(entities: T[]): Rx.Observable<T[]>;
-    remove(e: T): Rx.Observable<any>;
-    removeAll(): Rx.Observable<any>;
+    remove(e: T): Rx.Observable<T>;
+    removeAll(): Rx.Observable<any[]>;
     removeAllBy(query: any): Rx.Observable<any>;
     update(e: T): Rx.Observable<T>;
     updateAll(e: T[]): Rx.Observable<T[]>;
