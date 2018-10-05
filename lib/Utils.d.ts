@@ -1,4 +1,8 @@
 import * as TsMonad from "tsmonad";
+export declare class ObjectUtils {
+    static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
+    static expandObjectFromPath: (path: string, obj: any) => TsMonad.Maybe<any>;
+}
 export declare class RXUtils {
 }
 export declare class MonadUtils {
