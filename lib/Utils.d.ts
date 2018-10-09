@@ -2,6 +2,7 @@ import * as TsMonad from "tsmonad";
 export declare class ObjectUtils {
     static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
     static expandObjectFromPath: (path: string, obj: any) => TsMonad.Maybe<any>;
+    static assignValueToObjectFromPath: (path: string, obj: any, val: any) => void;
 }
 export declare class RXUtils {
 }

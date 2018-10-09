@@ -30,6 +30,18 @@ export class ObjectUtils {
             return TsMonad.Maybe.nothing();
         }
     }
+
+    static assignValueToObjectFromPath = (path:string, obj:any, val:any) =>{
+        let maxDeep = path.split('.').length - 1;
+        let index = (obj,key, i) => { 
+            if(maxDeep == i)
+                obj[key] = val;
+            return obj[key];
+        }
+        let expandObject = ()=> path.split('.').reduce(index, obj);
+        expandObject();
+    
+    }
 }
 
 export class RXUtils {
