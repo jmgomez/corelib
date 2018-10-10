@@ -1,4 +1,4 @@
-import { IRepository, IRxRepository} from "../Repository";
+import { IRepository, IRxRepository, SyncRxRepository} from "../Repository";
 import * as Rx from "rxjs/Rx";
 import * as TsMonad from 'tsmonad';
 import * as fs from "fs";
@@ -30,7 +30,6 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
     persist(){
         let json = JSON.stringify(this.entities);
         fs.writeFileSync(this.name, json);
-        console.log("Just wrote in the file");
     }
 
     add(entity: T) {
@@ -65,11 +64,16 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
     }
 
     getById(id:string) : TsMonad.Maybe<T>{
+
         return EntityQuery.tryGetById(this.entities, id);
     }
 
     getOneBy(query:any) :  TsMonad.Maybe<T> {
         return MonadUtils.CreateMaybeFromFirstElementOfAnArray(this.getAllBy(query));
+    }
+
+    toRxRepository(){
+        return new SyncRxRepository(this);
     }
 
     private loadFromFile(){
@@ -78,7 +82,6 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
         let json = fs.readFileSync(this.name, "UTF-8");
 
         return JSON.parse(json).map(this.fromJSON);
-
     }
 
 }

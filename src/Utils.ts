@@ -3,6 +3,47 @@ import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 
 
+export class ObjectUtils {
+
+    static addFunctionsToPrototype = (baseType:any, functionsModule:any) => {
+        Object.keys(functionsModule)
+            .filter(key=> (functionsModule[key] as any).constructor.name == "Function")
+            .forEach(key=>{
+                let func = functionsModule[key];
+                if(!baseType.prototype[key])
+                baseType.prototype[key] = function(args) { return func(this, args)};
+            })
+        }
+        
+    static expandObjectFromPath = (path:string, obj:any) => {  //retrieve the path (objext.innerObject) to the actual value
+        try{
+            let index = (obj,i) => obj[i];
+            let expandObject = ()=>  (path === "this") ? obj : path.split('.').reduce(index, obj);
+            let expandedObject = expandObject();
+            if(expandedObject && expandedObject.constructor.name == "Function"){
+                let pathToField = _.tail(path.split('.').reverse()).reverse().reduce((a,b)=> a.concat(b));
+                expandedObject = expandedObject.bind(obj[pathToField])();
+            }
+            return MonadUtils.CreateMaybeFromNullable(expandedObject);
+        }catch(e){
+            // console.error(e)
+            return TsMonad.Maybe.nothing();
+        }
+    }
+
+    static assignValueToObjectFromPath = (path:string, obj:any, val:any) =>{
+        let maxDeep = path.split('.').length - 1;
+        let index = (obj,key, i) => { 
+            if(maxDeep == i)
+                obj[key] = val;
+            return obj[key];
+        }
+        let expandObject = ()=> path.split('.').reduce(index, obj);
+        expandObject();
+    
+    }
+}
+
 export class RXUtils {
     
 }

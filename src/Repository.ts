@@ -122,7 +122,6 @@ export class InMemoryRepository<T extends Entity> implements IRepository<T>{
         return this.elems.filter(query);
     }
     getById(id:string){
-        console.log("Requesting by id", id, this.elems)
         return EntityQuery.tryGetById(this.elems, id);
     }
     getOneBy(query:any){
@@ -145,19 +144,19 @@ export class SyncRxRepository<T extends Entity> implements  IRxRepository<T> {
 
     add(e: T){
         this.repo.add(e);
-        return Rx.Observable.from([e]);
+        return Rx.Observable.of(e);
     }
     addMany(entities:T[]){
         this.repo.addMany(entities);
-        return Rx.Observable.from([entities])
+        return Rx.Observable.of(entities)
     }
     remove(e:T){
         this.repo.remove(e);
-        return Rx.Observable.from([]);
+        return Rx.Observable.of(e);
     }
     removeAll(){
         this.repo.removeAll();
-        return Rx.Observable.from([]);
+        return Rx.Observable.of([]);
     }
     removeAllBy(query:any){
         this.repo.removeAllBy(query);
@@ -166,27 +165,27 @@ export class SyncRxRepository<T extends Entity> implements  IRxRepository<T> {
 
     update(e:T){
         this.repo.update(e);
-        return Rx.Observable.from([e]);
+        return Rx.Observable.of(e);
     }
     updateAll(e:T[]){
         this.repo.updateAll(e);
-        return Rx.Observable.from([e]);
+        return Rx.Observable.of(e);
     }
 
     getAll() {
         let elems =  this.repo.getAll();
-        return Rx.Observable.from([elems]);
+        return Rx.Observable.of(elems);
     }
 
     getAllBy(query:any) {
         let elems =<T[]> this.repo.getAllBy(query);
-        return Rx.Observable.from([elems]);
+        return Rx.Observable.of(elems);
     }
     getById(id:string){
-        return Rx.Observable.from([this.repo.getById(id)]);
+        return Rx.Observable.of(this.repo.getById(id));
     }
     getOneBy(query:any){
-        return Rx.Observable.from([this.repo.getOneBy(query)]);
+        return Rx.Observable.of(this.repo.getOneBy(query));
     }
 
     asInMemoryRepository(){
@@ -209,3 +208,15 @@ export interface IRxRepository <T extends Entity> {
     getOneBy : (query:any) => Rx.Observable<TsMonad.Maybe<T>>;
 }
 
+
+export class UnitRxRepository<T extends Entity> {
+    constructor(private repo : IRxRepository<T>){}
+    
+    updateOrCreate = (value:T)=>
+       this.get(value.id).flatMap(maybeT=> maybeT.caseOf({
+           just: t=> this.repo.update(value),
+           nothing: ()=> this.repo.add(value).catch(e=> this.updateOrCreate(value))
+       }))
+
+    get = (id:string)=>  this.repo.getById(id) ; 
+}
