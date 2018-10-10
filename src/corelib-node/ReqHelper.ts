@@ -10,7 +10,7 @@ export class RequestHelperNodeImpl {
         return new Request(url, {method: method, body: JSON.stringify(data), headers: this.headers()});
     }
 
-    static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) {
+    static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) : Rx.Observable<any>{
         method = method ? method : "POST";
 
         let promise = fetch(this.prepareRequest(url, method, data));
