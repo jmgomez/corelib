@@ -13,11 +13,11 @@ export declare class MonadUtils {
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
 }
 export declare class NumberUtils {
-    static generateNextId(elements: any[]): number;
-    static generateNextIdForListOfString(elements: string[]): number;
+    static generateNextId(elements: any[]): any;
+    static generateNextIdForListOfString(elements: string[]): any;
     static generateNextIdFromString(element: string): number;
-    static generateRandomId(): string;
-    static generateCapUIID(): string;
+    static generateRandomId(): any;
+    static generateCapUIID(): any;
     static isInInterval(a: Number, b: Number, n: Number): boolean;
     static getPercentage(timecards: number, totalTimecards: number): number;
 }

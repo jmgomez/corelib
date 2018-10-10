@@ -4,7 +4,7 @@ import {DateUtils, MonadUtils, Period, RXUtils} from "./Utils";
 import {Entity } from "./Entity";
 import * as querystring from "querystring";
 import {EntityQuery} from "./EntityQuery";
-import * as Rx from "rxjs/Rx";
+import * as Rx from "rxjs";
 
 export interface IRepository<T extends Entity>{
     add : (value:T) => void;

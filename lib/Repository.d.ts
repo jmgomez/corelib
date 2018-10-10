@@ -1,7 +1,7 @@
 import { Response } from 'node-fetch';
 import * as TsMonad from 'tsmonad';
 import { Entity } from "./Entity";
-import * as Rx from "rxjs/Rx";
+import * as Rx from "rxjs";
 export interface IRepository<T extends Entity> {
     add: (value: T) => void;
     addMany: (value: T[]) => void;

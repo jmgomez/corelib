@@ -1,5 +1,5 @@
 import { IRepository, IRxRepository, SyncRxRepository} from "../Repository";
-import * as Rx from "rxjs/Rx";
+import * as Rx from "rxjs";
 import * as TsMonad from 'tsmonad';
 import * as fs from "fs";
 import {connect, Db, MongoClient} from "mongodb";
@@ -126,7 +126,7 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
     }
 
     getAllBy(query:any, exclude?:any){    
-        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity).toArray());
+        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity).toArray())as Rx.Observable<T[]>;
         return getAllCmd(this.db);
     }
 

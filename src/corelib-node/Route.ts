@@ -1,6 +1,5 @@
 import * as TsMonad from 'tsmonad';
 import * as R from 'ramda'
-import * as Rx from 'rx';
 import { IRepository, IRxRepository} from "../Repository";
 
 import {EntityQuery} from "../EntityQuery";

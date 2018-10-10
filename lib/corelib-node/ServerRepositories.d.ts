@@ -1,5 +1,5 @@
 import { IRepository, IRxRepository, SyncRxRepository } from "../Repository";
-import * as Rx from "rxjs/Rx";
+import * as Rx from "rxjs";
 import * as TsMonad from 'tsmonad';
 import { Db } from "mongodb";
 import { Entity } from "../Entity";
