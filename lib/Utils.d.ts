@@ -1,6 +1,8 @@
 import * as TsMonad from "tsmonad";
 export declare class ObjectUtils {
     static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
+    private static resolvePathAsArray;
+    private static extractValue;
     static expandObjectFromPath: (path: string, obj: any) => TsMonad.Maybe<any>;
     static assignValueToObjectFromPath: (path: string, obj: any, val: any) => void;
 }
@@ -13,11 +15,11 @@ export declare class MonadUtils {
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
 }
 export declare class NumberUtils {
-    static generateNextId(elements: any[]): any;
-    static generateNextIdForListOfString(elements: string[]): any;
+    static generateNextId(elements: any[]): number;
+    static generateNextIdForListOfString(elements: string[]): number;
     static generateNextIdFromString(element: string): number;
-    static generateRandomId(): any;
-    static generateCapUIID(): any;
+    static generateRandomId(): string;
+    static generateCapUIID(): string;
     static isInInterval(a: Number, b: Number, n: Number): boolean;
     static getPercentage(timecards: number, totalTimecards: number): number;
 }
@@ -29,6 +31,7 @@ export declare class StringUtils {
     static replaceMany(strs: string[], search: string, replacement: string): string;
     static parseCCBoolean(value: string): boolean;
     static capitalizeFirstLetter(str: string): string;
+    static test(arg1: any, arg2: any): any;
     static countWords(s: string): number;
     static format: (...args: any[]) => any;
     static stringContains(str: string, keyword: string): boolean;

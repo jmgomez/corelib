@@ -14,19 +14,40 @@ export class ObjectUtils {
                 baseType.prototype[key] = function(args) { return func(this, args)};
             })
         }
-        
+    private static resolvePathAsArray = (pathValue:string[], obj:any) => {
+        //array format => functionName, pathToArg1...pathToArgN
+        let parameters = 
+                pathValue.map(path=>ObjectUtils.extractValue(path, obj))
+        let params = _.tail(parameters)
+        let val = (_.head(parameters) as Function).call(_.head(params), ... _.tail(params));
+        return val;
+    }
+
+    private static extractValue = (path:string, obj:any) => {
+        let index = (obj,i) => obj[i];
+        let isPathArray = path.startsWith("[") && path.endsWith("]");
+        let isObject = (path === "this");
+        if(isPathArray)
+            return ObjectUtils.resolvePathAsArray(JSON.parse(path), obj)
+
+        let expandObject = ()=>  isObject ? obj : path.split('.').reduce(index, obj);
+
+        return expandObject();
+
+    }
+
     static expandObjectFromPath = (path:string, obj:any) => {  //retrieve the path (objext.innerObject) to the actual value
         try{
-            let index = (obj,i) => obj[i];
-            let expandObject = ()=>  (path === "this") ? obj : path.split('.').reduce(index, obj);
-            let expandedObject = expandObject();
+            
+            let expandedObject = ObjectUtils.extractValue(path, obj);
             if(expandedObject && expandedObject.constructor.name == "Function"){
                 let pathToField = _.tail(path.split('.').reverse()).reverse().reduce((a,b)=> a.concat(b));
                 expandedObject = expandedObject.bind(obj[pathToField])();
             }
+
             return MonadUtils.CreateMaybeFromNullable(expandedObject);
-        }catch(e){
-            // console.error(e)
+        } catch(e){
+            // console.warn(e);
             return TsMonad.Maybe.nothing();
         }
     }
@@ -123,6 +144,10 @@ export class StringUtils {
 
     public static capitalizeFirstLetter(str:string) {
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    public static test(arg1, arg2){
+        return arg1 + arg2;
     }
 
     public static countWords(s:string){
@@ -283,6 +308,7 @@ export class DateUtils {
 
     public static getDifferenceInDays(a:Date, b:Date){
         let days = new Date(<any>a - <any>b).getDate() - 1;
+        
         return days;
     }
 }
