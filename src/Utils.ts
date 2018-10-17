@@ -16,10 +16,9 @@ export class ObjectUtils {
         }
     private static resolvePathAsArray = (pathValue:string[], obj:any) => {
         //array format => functionName, pathToArg1...pathToArgN
-        let parameters = 
-                pathValue.map(path=>ObjectUtils.extractValue(path, obj))
-        let params = _.tail(parameters)
-        let val = (_.head(parameters) as Function).call(_.head(params), ... _.tail(params));
+        let args = _.tail(pathValue).map(path=>ObjectUtils.extractValue(path, obj))
+        let funName = _.head(pathValue); 
+        let val = (({})[funName] as Function).call(_.head(args),... _.tail(args));
         return val;
     }
 
@@ -44,7 +43,6 @@ export class ObjectUtils {
                 let pathToField = _.tail(path.split('.').reverse()).reverse().reduce((a,b)=> a.concat(b));
                 expandedObject = expandedObject.bind(obj[pathToField])();
             }
-
             return MonadUtils.CreateMaybeFromNullable(expandedObject);
         } catch(e){
             // console.warn(e);
@@ -308,7 +306,6 @@ export class DateUtils {
 
     public static getDifferenceInDays(a:Date, b:Date){
         let days = new Date(<any>a - <any>b).getDate() - 1;
-        
         return days;
     }
 }
