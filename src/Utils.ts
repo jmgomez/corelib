@@ -306,6 +306,7 @@ export class DateUtils {
 
     public static getDifferenceInDays(a:Date, b:Date){
         let days = new Date(<any>a - <any>b).getDate() - 1;
+        console.log("The difference is ", days)
         return days;
     }
 }
