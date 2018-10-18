@@ -1,4 +1,6 @@
 import * as TsMonad from "tsmonad";
+export declare class DynamicHelpers {
+}
 export declare class ObjectUtils {
     static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
     private static resolvePathAsArray;

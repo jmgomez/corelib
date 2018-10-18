@@ -2,6 +2,11 @@ import _ from "underscore";
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 
+//This will be use to add functions that will be read using reflection in escenarios 
+//of metaprogramming.
+export class DynamicHelpers {
+
+}
 
 export class ObjectUtils {
 
@@ -18,7 +23,8 @@ export class ObjectUtils {
         //array format => functionName, pathToArg1...pathToArgN
         let args = _.tail(pathValue).map(path=>ObjectUtils.extractValue(path, obj))
         let funName = _.head(pathValue); 
-        let val = (({})[funName] as Function).call(_.head(args),... _.tail(args));
+        let dynH = new DynamicHelpers();
+        let val = (dynH[funName] as Function).call(_.head(args),... _.tail(args));
         return val;
     }
 
@@ -306,7 +312,6 @@ export class DateUtils {
 
     public static getDifferenceInDays(a:Date, b:Date){
         let days = new Date(<any>a - <any>b).getDate() - 1;
-        console.log("The difference is ", days)
         return days;
     }
 }
