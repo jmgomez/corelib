@@ -309,6 +309,9 @@ export class DateUtils {
         return msDateA > msDateB;
     }
 
+    public static getDifferenceInMs(a:Date, b:Date){
+        return Math.abs(a.valueOf() - b.valueOf());
+    }
 
     public static getDifferenceInDays(a:Date, b:Date){
         let days = new Date(<any>a - <any>b).getDate() - 1;
