@@ -15,6 +15,7 @@ export declare class MonadUtils {
     static CreateMaybeFromNullable<T>(value?: T): TsMonad.Maybe<T>;
     static CreateMaybeFromArray<T>(value: T[]): TsMonad.Maybe<T[]>;
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
+    static BooleanToMaybe<T>(value: T, condition: boolean): TsMonad.Maybe<T>;
 }
 export declare class NumberUtils {
     static generateNextId(elements: any[]): number;

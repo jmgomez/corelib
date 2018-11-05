@@ -88,6 +88,10 @@ export class MonadUtils {
         if(value.length == 0 ) return TsMonad.Maybe.nothing<T>();
         return MonadUtils.CreateMaybeFromNullable(value[0]);
     }
+    public static BooleanToMaybe<T> (value:T, condition:boolean) {
+        return condition ? TsMonad.Maybe.maybe(value) : TsMonad.Maybe.nothing<T>();
+    }
+
 }
 
 export class NumberUtils {
