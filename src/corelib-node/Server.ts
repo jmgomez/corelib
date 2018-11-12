@@ -14,6 +14,7 @@ import * as http from "http";
 import {NextFunction} from "express-serve-static-core";
 import {Entity} from "../Entity";
 import {Route} from "./Route";
+import { ObjectUtils } from "../Utils";
 
 
 
@@ -50,7 +51,7 @@ export class Server {
     public start(){
         this.setupRoutes();
         this.server = this.app.listen(this.port, () => {
-            console.log("info", "--> Server "+this.constructor.name+" successfully started at port %d", this.port);
+            console.log("info", "--> Server "+ObjectUtils.getConstructorName(this)+" successfully started at port %d", this.port);
         });
     }
 

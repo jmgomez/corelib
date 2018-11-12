@@ -22,7 +22,9 @@ export class RequestHelperNodeImpl {
         // });
         //AT some point fix this
         let promise = fetch(this.prepareRequest(url, method, data));
-        return Rx.Observable.fromPromise(promise.then(res=>res.json()).catch(e=> onError(e)))
+        return Rx.Observable.fromPromise(promise.then(res=>res.json()).catch(e=> {  
+            onError(e); 
+        }))
 
     }
 

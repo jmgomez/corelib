@@ -9,10 +9,12 @@ export class DynamicHelpers {
 }
 
 export class ObjectUtils {
-
+    static getConstructorName (obj:object){
+        return obj.constructor.name;
+    }
     static addFunctionsToPrototype = (baseType:any, functionsModule:any) => {
         Object.keys(functionsModule)
-            .filter(key=> (functionsModule[key] as any).constructor.name == "Function")
+            .filter(key=> ObjectUtils.getConstructorName((functionsModule[key] as any)) == "Function")
             .forEach(key=>{
                 let func = functionsModule[key];
                 if(!baseType.prototype[key])
@@ -45,7 +47,7 @@ export class ObjectUtils {
         try{
             
             let expandedObject = ObjectUtils.extractValue(path, obj);
-            if(expandedObject && expandedObject.constructor.name == "Function"){
+            if(expandedObject && ObjectUtils.getConstructorName(expandedObject) == "Function"){
                 let pathToField = _.tail(path.split('.').reverse()).reverse().reduce((a,b)=> a.concat(b));
                 expandedObject = expandedObject.bind(obj[pathToField])();
             }

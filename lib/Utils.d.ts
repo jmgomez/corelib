@@ -2,6 +2,7 @@ import * as TsMonad from "tsmonad";
 export declare class DynamicHelpers {
 }
 export declare class ObjectUtils {
+    static getConstructorName(obj: object): string;
     static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
     private static resolvePathAsArray;
     private static extractValue;
