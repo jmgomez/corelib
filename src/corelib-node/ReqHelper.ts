@@ -17,7 +17,8 @@ export class RequestHelperNodeImpl {
         return Rx.Observable.fromPromise(fetch(this.prepareRequest(url, method, data))).flatMap(res=>{
             if(res.ok) 
                 return Rx.Observable.fromPromise(res.clone().json())
-         
+             if (onError)
+                 onError(res);
             return Rx.Observable.throw(new Error(`Server Response ${ res.status } ${ res.statusText } URL ${url} Method: ${ method }`))
         });
         //AT some point fix this
