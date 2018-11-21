@@ -92,4 +92,31 @@ export declare class Period {
         to: string;
     };
 }
+export declare class TextReplacer {
+    readonly args: TextReplacerConstructorArgs;
+    constructor(args: TextReplacerConstructorArgs);
+    replace(text: string): string;
+    static createArgs(text: string, word: string, replacement: string, escapeLietral: any): {
+        text: string;
+        word: string;
+        replacement: string;
+        escapeOpenerLiteral: any;
+        escapeCloserLiteral: any;
+    };
+    static replace(args: ReplaceArgs): string;
+    private static replaceWithRegex;
+    private static replaceWithEscape;
+    private static checkArgs;
+    private static checkText;
+}
+interface TextReplacerConstructorArgs {
+    word: string;
+    replacement: string;
+    escapeOpenerLiteral?: string;
+    escapeCloserLiteral?: string;
+}
+interface ReplaceArgs extends TextReplacerConstructorArgs {
+    text: string;
+}
+export {};
 //# sourceMappingURL=Utils.d.ts.map

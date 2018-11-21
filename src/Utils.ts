@@ -54,6 +54,7 @@ export class ObjectUtils {
             return MonadUtils.CreateMaybeFromNullable(expandedObject);
         } catch(e){
             // console.warn(e);
+            // console.error("FALLA EN ", path, obj)
             return TsMonad.Maybe.nothing();
         }
     }
@@ -439,4 +440,185 @@ class TimeUtils {
         };
         return sign + padWithLeadingZero(Math.floor(Math.abs(offset) / 60)) + ":" + padWithLeadingZero(offset % 60);
     }
+}
+
+
+export class TextReplacer {
+
+    readonly args: TextReplacerConstructorArgs;
+
+    constructor(args: TextReplacerConstructorArgs) {
+        this.args = {...args};
+    }
+
+    replace(text: string) {
+        return TextReplacer.replace({text, ...this.args});
+    }
+    static createArgs(text:string,
+                      word: string,
+                      replacement: string,
+                      escapeLietral){
+        return {
+            text: text,
+            word: word,
+            replacement: replacement,
+            escapeOpenerLiteral : escapeLietral,
+            escapeCloserLiteral : escapeLietral
+        }
+
+    }
+
+    static replace(args: ReplaceArgs): string {
+
+        this.checkText(args.text);
+        this.checkArgs(args);
+
+        // no replacement needed
+        if (args.text.length == 0 || args.word == args.replacement)
+            return args.text;
+
+        const areEscapeLiteralsDefined = args.escapeOpenerLiteral != null && args.escapeCloserLiteral != null;
+
+        // no escape literals, no special case needed. we just use standard regex replacement
+        if (!areEscapeLiteralsDefined)
+            return this.replaceWithRegex(args);
+
+        return this.replaceWithEscape(args);
+    }
+
+    private static replaceWithRegex(args: {text: string, word: string, replacement: string}) {
+        return args.text.replace(new RegExp(args.word, "g"), args.replacement);
+    }
+
+    private static replaceWithEscape(args: ReplaceArgs): string {
+        // word position
+        let jw = 0;
+
+        let lastWordPost: number;
+
+        // means the first part of the word matched before
+        let isReplaceActive = false;
+
+        let result = "";
+
+        // means a opener escape char was detected before
+        let isEscapeActive = false;
+
+        // we use this to track for not matching closer literal, to reprocess the last part of the text
+        let lastOpenerPos: number;
+
+        for (let jt = 0; jt < args.text.length; jt++) {
+
+            const t = args.text.charAt(jt);
+
+            if (isEscapeActive && t == args.escapeCloserLiteral) {
+                result += args.text.substring(lastOpenerPos, jt + 1);
+                isEscapeActive = false;
+                lastOpenerPos = null;
+                continue;
+            }
+
+            if (isEscapeActive && t != args.escapeCloserLiteral) {
+                continue;
+            }
+
+            if (!isEscapeActive && t == args.escapeOpenerLiteral) {
+                isEscapeActive = true;
+                lastOpenerPos = jt;
+                continue;
+            }
+
+            // !isEscapeActive && t != args.escapeOpenerLiteral
+
+            const w = args.word.charAt(jw);
+
+            if (isReplaceActive && t == w && (jw == args.word.length - 1)) {
+                isReplaceActive = false;
+                lastWordPost = null;
+                jw = 0;
+                result += args.replacement;
+                continue;
+            }
+
+            if (isReplaceActive && t == w && (jw < args.word.length - 1)) {
+                jw += 1;
+                continue;
+            }
+
+            if (isReplaceActive && t != w) {
+                result += args.text.substring(lastWordPost, jt + 1);
+                isReplaceActive = false;
+                lastWordPost = null;
+                jw = 0;
+                continue;
+            }
+
+            // !isReplaceActive
+
+            if (t == w) {
+                isReplaceActive = true;
+                lastWordPost = jt;
+                jw = 1;
+                continue;
+            }
+
+            result += t;
+
+        }
+
+        // the closing escape literal was not found, so the unfinished escaped part hast to be reprocessed as standard text
+        if (isEscapeActive) {
+            const lastPart = args.text.substring(lastOpenerPos);
+
+            const lastPartReplaced = this.replaceWithRegex({...args, text: lastPart} as any);
+            result += lastPartReplaced;
+        }
+
+        return result;
+    }
+
+    private static checkArgs(args: TextReplacerConstructorArgs) {
+        if (args.word == null || args.word.length == 0)
+            throw "Word must be defined";
+
+        if (args.replacement == null || args.replacement.length == 0)
+            throw "Replacement must be defined";
+
+        if ((args.escapeOpenerLiteral == null) != (args.escapeCloserLiteral == null))
+            throw "Either define literals or not";
+
+        if (args.escapeOpenerLiteral != null && args.escapeOpenerLiteral.length == 0)
+            throw "Empty opener literal is not valid";
+
+        if (args.escapeCloserLiteral != null && args.escapeCloserLiteral.length == 0)
+            throw "Empty closer literal is not valid";
+
+        if (args.escapeOpenerLiteral != null && args.word.indexOf(args.escapeOpenerLiteral) != -1)
+            throw "Escape literals are not allowed inside the word that is going to be replaced";
+
+        if (args.escapeCloserLiteral != null && args.word.indexOf(args.escapeCloserLiteral) != -1)
+            throw "Escape literals are not allowed inside the word that is going to be replaced";
+
+        if (args.escapeOpenerLiteral != null && args.escapeOpenerLiteral.length > 1)
+            throw "Escape literals are only allowed to be one character size";
+
+        if (args.escapeCloserLiteral != null && args.escapeCloserLiteral.length > 1)
+            throw "Escape literals are only allowed to be one character size";
+    }
+
+    private static checkText(text: string) {
+        if (text == null)
+            throw "Text must be defined";
+    }
+}
+
+interface TextReplacerConstructorArgs {
+    word: string,
+    replacement: string,
+    escapeOpenerLiteral?: string,
+    escapeCloserLiteral?: string
+}
+
+interface ReplaceArgs extends TextReplacerConstructorArgs {
+    text: string
 }
