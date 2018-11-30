@@ -1,4 +1,5 @@
 import * as TsMonad from "tsmonad";
+import { Either } from "tsmonad";
 export declare class DynamicHelpers {
 }
 export declare class ObjectUtils {
@@ -17,6 +18,8 @@ export declare class MonadUtils {
     static CreateMaybeFromArray<T>(value: T[]): TsMonad.Maybe<T[]>;
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
     static BooleanToMaybe<T>(value: T, condition: boolean): TsMonad.Maybe<T>;
+    static MapLeft<L, R, T>(either: Either<L, R>, fun: (L: any) => T): Either<T, R>;
+    static FromEitherToMaybe<L, R>(either: Either<L, R>): TsMonad.Maybe<R>;
 }
 export declare class NumberUtils {
     static generateNextId(elements: any[]): number;

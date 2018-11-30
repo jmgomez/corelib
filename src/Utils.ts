@@ -1,6 +1,7 @@
 import _ from "underscore";
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
+import {Either, Maybe} from "tsmonad";
 
 //This will be use to add functions that will be read using reflection in escenarios 
 //of metaprogramming.
@@ -94,6 +95,18 @@ export class MonadUtils {
     public static BooleanToMaybe<T> (value:T, condition:boolean) {
         return condition ? TsMonad.Maybe.maybe(value) : TsMonad.Maybe.nothing<T>();
     }
+    public static MapLeft<L,R, T>(either: Either<L,R>, fun:(L)=>T) : Either<T,R> {
+        return either.caseOf({
+            left: l => Either.left<T,R>(fun(l)),
+            right: r=> Either.right<T,R>(r),
+        });
+    }
+    public static FromEitherToMaybe<L,R>(either:Either<L,R>){
+        return either.caseOf({
+            left: l=> Maybe.nothing<R>(),
+            right: r => Maybe.maybe(r)
+        })
+    }
 
 }
 
@@ -146,6 +159,8 @@ export class StringUtils {
     public static replaceAll(str:string, search:string, replacement:string){
         return str.split(search).join(replacement);
     }
+
+
     public static replaceMany(strs:string[], search:string, replacement:string){
         return strs.reduce((a,b)=>this.replaceAll(b, a, replacement));
     }
