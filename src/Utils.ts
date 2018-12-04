@@ -11,6 +11,16 @@ export class DynamicHelpers {
 
 export class ObjectUtils {
     static getConstructorName (obj:object){
+        if(obj.constructor.name == undefined)
+            Object.defineProperty(Function.prototype, 'name', {
+                get: function() {
+                    var funcNameRegex = /function\s([^(]{1,})\(/;
+                    var results = (funcNameRegex).exec((this).toString());
+                    return (results && results.length > 1) ? results[1].trim() : "";
+                },
+                set: function(value) {}
+            });
+
         return obj.constructor.name;
     }
     static addFunctionsToPrototype = (baseType:any, functionsModule:any) => {
