@@ -29,7 +29,7 @@ export declare class APIRepository<T extends Entity> implements IRxRepository<T>
     update(entity: T): Rx.Observable<any>;
     remove(entity: T): Rx.Observable<any>;
     getById(id: string): Rx.Observable<TsMonad.Maybe<any>>;
-    removeAllBy(query: any): Rx.Observable<any[]>;
+    removeAllBy(query: any): Rx.Observable<any>;
     getAllBy(query: any): Rx.Observable<any>;
     updateAll: (value: T[]) => Rx.Observable<T[]>;
     removeAll: () => Rx.Observable<any>;

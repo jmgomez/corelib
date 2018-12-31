@@ -24,6 +24,7 @@ export class Route<T extends Entity> {
         let router = Router();
         router.route("/").get(this.getAll).post(this.create).delete(this.deleteAll).options(NodeUtils.okOptions);
         router.route("/deleteall").get(this.deleteAllBy).options(NodeUtils.okOptions);
+        router.route("/deleteallby").delete(this.deleteAllBy).options(NodeUtils.okOptions);
         router.route("/getallby").get(this.getAllBy).options(NodeUtils.okOptions);
         router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils.okOptions);
         return router;

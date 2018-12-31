@@ -60,7 +60,6 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
     }
 
     getAllBy(query:any){
-        console.log("THE CALL HAS ", query)
         return this.getAll().filter(query);
     }
 

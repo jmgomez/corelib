@@ -71,7 +71,8 @@ export class APIRepository<T extends Entity> implements IRxRepository<T>{
     }
 
     removeAllBy(query:any) {
-        return Rx.Observable.of([]);
+        let path = this.endPoint+"deleteallby"+query;
+        return this.requestHelper.makeRequest(path, 'delete', {}, this.onError.bind(this))
     }
 
     getAllBy(query:any){

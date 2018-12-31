@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -13,6 +24,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var underscore_1 = __importDefault(require("underscore"));
 var uuid = __importStar(require("uuid"));
 var TsMonad = __importStar(require("tsmonad"));
+var tsmonad_1 = require("tsmonad");
 //This will be use to add functions that will be read using reflection in escenarios 
 //of metaprogramming.
 var DynamicHelpers = /** @class */ (function () {
@@ -24,9 +36,21 @@ exports.DynamicHelpers = DynamicHelpers;
 var ObjectUtils = /** @class */ (function () {
     function ObjectUtils() {
     }
+    ObjectUtils.getConstructorName = function (obj) {
+        if (obj.constructor.name == undefined)
+            Object.defineProperty(Function.prototype, 'name', {
+                get: function () {
+                    var funcNameRegex = /function\s([^(]{1,})\(/;
+                    var results = (funcNameRegex).exec((this).toString());
+                    return (results && results.length > 1) ? results[1].trim() : "";
+                },
+                set: function (value) { }
+            });
+        return obj.constructor.name;
+    };
     ObjectUtils.addFunctionsToPrototype = function (baseType, functionsModule) {
         Object.keys(functionsModule)
-            .filter(function (key) { return functionsModule[key].constructor.name == "Function"; })
+            .filter(function (key) { return ObjectUtils.getConstructorName(functionsModule[key]) == "Function"; })
             .forEach(function (key) {
             var func = functionsModule[key];
             if (!baseType.prototype[key])
@@ -54,7 +78,7 @@ var ObjectUtils = /** @class */ (function () {
     ObjectUtils.expandObjectFromPath = function (path, obj) {
         try {
             var expandedObject = ObjectUtils.extractValue(path, obj);
-            if (expandedObject && expandedObject.constructor.name == "Function") {
+            if (expandedObject && ObjectUtils.getConstructorName(expandedObject) == "Function") {
                 var pathToField = underscore_1.default.tail(path.split('.').reverse()).reverse().reduce(function (a, b) { return a.concat(b); });
                 expandedObject = expandedObject.bind(obj[pathToField])();
             }
@@ -62,6 +86,7 @@ var ObjectUtils = /** @class */ (function () {
         }
         catch (e) {
             // console.warn(e);
+            // console.error("FALLA EN ", path, obj)
             return TsMonad.Maybe.nothing();
         }
     };
@@ -103,6 +128,21 @@ var MonadUtils = /** @class */ (function () {
         if (value.length == 0)
             return TsMonad.Maybe.nothing();
         return MonadUtils.CreateMaybeFromNullable(value[0]);
+    };
+    MonadUtils.BooleanToMaybe = function (value, condition) {
+        return condition ? TsMonad.Maybe.maybe(value) : TsMonad.Maybe.nothing();
+    };
+    MonadUtils.MapLeft = function (either, fun) {
+        return either.caseOf({
+            left: function (l) { return tsmonad_1.Either.left(fun(l)); },
+            right: function (r) { return tsmonad_1.Either.right(r); },
+        });
+    };
+    MonadUtils.FromEitherToMaybe = function (either) {
+        return either.caseOf({
+            left: function (l) { return tsmonad_1.Maybe.nothing(); },
+            right: function (r) { return tsmonad_1.Maybe.maybe(r); }
+        });
     };
     return MonadUtils;
 }());
@@ -427,4 +467,126 @@ var TimeUtils = /** @class */ (function () {
     };
     return TimeUtils;
 }());
+var TextReplacer = /** @class */ (function () {
+    function TextReplacer(args) {
+        this.args = __assign({}, args);
+    }
+    TextReplacer.prototype.replace = function (text) {
+        return TextReplacer.replace(__assign({ text: text }, this.args));
+    };
+    TextReplacer.createArgs = function (text, word, replacement, escapeLietral) {
+        return {
+            text: text,
+            word: word,
+            replacement: replacement,
+            escapeOpenerLiteral: escapeLietral,
+            escapeCloserLiteral: escapeLietral
+        };
+    };
+    TextReplacer.replace = function (args) {
+        this.checkText(args.text);
+        this.checkArgs(args);
+        // no replacement needed
+        if (args.text.length == 0 || args.word == args.replacement)
+            return args.text;
+        var areEscapeLiteralsDefined = args.escapeOpenerLiteral != null && args.escapeCloserLiteral != null;
+        // no escape literals, no special case needed. we just use standard regex replacement
+        if (!areEscapeLiteralsDefined)
+            return this.replaceWithRegex(args);
+        return this.replaceWithEscape(args);
+    };
+    TextReplacer.replaceWithRegex = function (args) {
+        return args.text.replace(new RegExp(args.word, "g"), args.replacement);
+    };
+    TextReplacer.replaceWithEscape = function (args) {
+        // word position
+        var jw = 0;
+        var lastWordPost;
+        // means the first part of the word matched before
+        var isReplaceActive = false;
+        var result = "";
+        // means a opener escape char was detected before
+        var isEscapeActive = false;
+        // we use this to track for not matching closer literal, to reprocess the last part of the text
+        var lastOpenerPos;
+        for (var jt = 0; jt < args.text.length; jt++) {
+            var t = args.text.charAt(jt);
+            if (isEscapeActive && t == args.escapeCloserLiteral) {
+                result += args.text.substring(lastOpenerPos, jt + 1);
+                isEscapeActive = false;
+                lastOpenerPos = null;
+                continue;
+            }
+            if (isEscapeActive && t != args.escapeCloserLiteral) {
+                continue;
+            }
+            if (!isEscapeActive && t == args.escapeOpenerLiteral) {
+                isEscapeActive = true;
+                lastOpenerPos = jt;
+                continue;
+            }
+            // !isEscapeActive && t != args.escapeOpenerLiteral
+            var w = args.word.charAt(jw);
+            if (isReplaceActive && t == w && (jw == args.word.length - 1)) {
+                isReplaceActive = false;
+                lastWordPost = null;
+                jw = 0;
+                result += args.replacement;
+                continue;
+            }
+            if (isReplaceActive && t == w && (jw < args.word.length - 1)) {
+                jw += 1;
+                continue;
+            }
+            if (isReplaceActive && t != w) {
+                result += args.text.substring(lastWordPost, jt + 1);
+                isReplaceActive = false;
+                lastWordPost = null;
+                jw = 0;
+                continue;
+            }
+            // !isReplaceActive
+            if (t == w) {
+                isReplaceActive = true;
+                lastWordPost = jt;
+                jw = 1;
+                continue;
+            }
+            result += t;
+        }
+        // the closing escape literal was not found, so the unfinished escaped part hast to be reprocessed as standard text
+        if (isEscapeActive) {
+            var lastPart = args.text.substring(lastOpenerPos);
+            var lastPartReplaced = this.replaceWithRegex(__assign({}, args, { text: lastPart }));
+            result += lastPartReplaced;
+        }
+        return result;
+    };
+    TextReplacer.checkArgs = function (args) {
+        if (args.word == null || args.word.length == 0)
+            throw "Word must be defined";
+        if (args.replacement == null || args.replacement.length == 0)
+            throw "Replacement must be defined";
+        if ((args.escapeOpenerLiteral == null) != (args.escapeCloserLiteral == null))
+            throw "Either define literals or not";
+        if (args.escapeOpenerLiteral != null && args.escapeOpenerLiteral.length == 0)
+            throw "Empty opener literal is not valid";
+        if (args.escapeCloserLiteral != null && args.escapeCloserLiteral.length == 0)
+            throw "Empty closer literal is not valid";
+        if (args.escapeOpenerLiteral != null && args.word.indexOf(args.escapeOpenerLiteral) != -1)
+            throw "Escape literals are not allowed inside the word that is going to be replaced";
+        if (args.escapeCloserLiteral != null && args.word.indexOf(args.escapeCloserLiteral) != -1)
+            throw "Escape literals are not allowed inside the word that is going to be replaced";
+        if (args.escapeOpenerLiteral != null && args.escapeOpenerLiteral.length > 1)
+            throw "Escape literals are only allowed to be one character size";
+        if (args.escapeCloserLiteral != null && args.escapeCloserLiteral.length > 1)
+            throw "Escape literals are only allowed to be one character size";
+    };
+    TextReplacer.checkText = function (text) {
+        if (text == null)
+            throw "Text must be defined";
+    };
+    return TextReplacer;
+}());
+exports.TextReplacer = TextReplacer;
 //# sourceMappingURL=Utils.js.map

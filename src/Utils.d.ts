@@ -1,7 +1,9 @@
 import * as TsMonad from "tsmonad";
+import { Either } from "tsmonad";
 export declare class DynamicHelpers {
 }
 export declare class ObjectUtils {
+    static getConstructorName(obj: object): string;
     static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
     private static resolvePathAsArray;
     private static extractValue;
@@ -15,6 +17,9 @@ export declare class MonadUtils {
     static CreateMaybeFromNullable<T>(value?: T): TsMonad.Maybe<T>;
     static CreateMaybeFromArray<T>(value: T[]): TsMonad.Maybe<T[]>;
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
+    static BooleanToMaybe<T>(value: T, condition: boolean): TsMonad.Maybe<T>;
+    static MapLeft<L, R, T>(either: Either<L, R>, fun: (L: any) => T): Either<T, R>;
+    static FromEitherToMaybe<L, R>(either: Either<L, R>): TsMonad.Maybe<R>;
 }
 export declare class NumberUtils {
     static generateNextId(elements: any[]): number;
@@ -90,4 +95,31 @@ export declare class Period {
         to: string;
     };
 }
+export declare class TextReplacer {
+    readonly args: TextReplacerConstructorArgs;
+    constructor(args: TextReplacerConstructorArgs);
+    replace(text: string): string;
+    static createArgs(text: string, word: string, replacement: string, escapeLietral: any): {
+        text: string;
+        word: string;
+        replacement: string;
+        escapeOpenerLiteral: any;
+        escapeCloserLiteral: any;
+    };
+    static replace(args: ReplaceArgs): string;
+    private static replaceWithRegex;
+    private static replaceWithEscape;
+    private static checkArgs;
+    private static checkText;
+}
+interface TextReplacerConstructorArgs {
+    word: string;
+    replacement: string;
+    escapeOpenerLiteral?: string;
+    escapeCloserLiteral?: string;
+}
+interface ReplaceArgs extends TextReplacerConstructorArgs {
+    text: string;
+}
+export {};
 //# sourceMappingURL=Utils.d.ts.map
