@@ -1,5 +1,6 @@
+import * as Rx from 'rxjs';
 import * as TsMonad from "tsmonad";
-import { Either } from "tsmonad";
+import { Either, Maybe } from "tsmonad";
 export declare class DynamicHelpers {
 }
 export declare class ObjectUtils {
@@ -13,13 +14,22 @@ export declare class ObjectUtils {
 export declare class RXUtils {
 }
 export declare class MonadUtils {
+    static sequenceMb<T>(entities: Maybe<T>[]): Maybe<T[]>;
+    static mbConcat<T>(mba: Maybe<T>[], mbb: Maybe<T>): Maybe<T>[];
+    static mbConcatR<T>(mba: Maybe<T[]>, mbb: Maybe<T[]>): Maybe<T[]>;
+    static sequenceA<T>(mentities: Maybe<T[]>): Maybe<T>[];
+    static mbJoinArr<T>(mb: Maybe<Maybe<T>[]>): Maybe<T>[];
     static Ignore(): void;
     static CreateMaybeFromNullable<T>(value?: T): TsMonad.Maybe<T>;
     static CreateMaybeFromArray<T>(value: T[]): TsMonad.Maybe<T[]>;
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
-    static BooleanToMaybe<T>(value: T, condition: boolean): TsMonad.Maybe<T>;
-    static MapLeft<L, R, T>(either: Either<L, R>, fun: (L: any) => T): Either<T, R>;
-    static FromEitherToMaybe<L, R>(either: Either<L, R>): TsMonad.Maybe<R>;
+    static mbJoinRx<T>(mbval: Maybe<Rx.Observable<T>>): Rx.Observable<Maybe<T>>;
+    static mapToRxFallback<T>(mb: Maybe<T>, func: () => Rx.Observable<Maybe<T>>): Rx.Observable<TsMonad.Maybe<T>>;
+    static booleanToMaybe<T>(value: T, condition: boolean): TsMonad.Maybe<T>;
+    static mapLeft<L, R, T>(either: Either<L, R>, fun: (L: any) => T): Either<T, R>;
+    static fromEitherToMaybe<L, R>(either: Either<L, R>): TsMonad.Maybe<R>;
+    static sequence<L, R>(entries: TsMonad.Either<L, R>[]): TsMonad.Either<L, R[]>;
+    static reduceLeftToRx<L, R>(data: TsMonad.Either<L, Rx.Observable<TsMonad.Either<L, R>>>): Rx.Observable<TsMonad.Either<L, R>>;
 }
 export declare class NumberUtils {
     static generateNextId(elements: any[]): number;

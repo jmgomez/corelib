@@ -1,4 +1,5 @@
 import _ from "underscore";
+import * as Rx from 'rxjs'
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 import {Either, Maybe} from "tsmonad";
@@ -87,6 +88,51 @@ export class RXUtils {
     
 }
 export class MonadUtils {
+
+
+    static sequenceMb<T>(entities: Maybe<T>[]): Maybe<T[]> {
+        let acc = [] as T[];
+        let nothing = false;
+        entities.forEach(e => e.caseOf({
+            nothing: () => { nothing = true },
+            just: e => acc.push(e)
+        }));
+        if ((nothing)) {
+            console.log("REACH NOTHING")
+            return Maybe.nothing<T[]>();
+        }
+        console.log("ACC ", acc)
+        return Maybe.just(acc);
+
+    }
+
+    static mbConcat<T>(mba:Maybe<T>[], mbb:Maybe<T>) : Maybe<T>[]{
+        return mba.concat(mbb)
+    }
+
+    static mbConcatR<T>(mba:Maybe<T[]>, mbb:Maybe<T[]>) : Maybe<T[]>{
+
+        return mba.bind(m=>mbb.map(m2=> m.concat(m2)))
+    }
+
+    static sequenceA<T>(mentities: Maybe<T[]>): Maybe<T>[] {
+        return mentities.caseOf({
+            nothing: ()=> [Maybe.nothing<T>()],
+            just: values => values.map(v=>Maybe.just(v))
+        })
+
+    }
+
+
+
+    static mbJoinArr<T>(mb : Maybe<Maybe<T>[]>) : Maybe<T>[] {
+        return mb.caseOf({
+            nothing: ()=> [Maybe.nothing<T>()],
+            just: m => m
+        })
+    }
+
+
     public static Ignore() {
     }
     public static CreateMaybeFromNullable<T>(value? : T){
@@ -102,20 +148,63 @@ export class MonadUtils {
         if(value.length == 0 ) return TsMonad.Maybe.nothing<T>();
         return MonadUtils.CreateMaybeFromNullable(value[0]);
     }
-    public static BooleanToMaybe<T> (value:T, condition:boolean) {
+
+    public static mbJoinRx <T> (mbval: Maybe<Rx.Observable<T>>) : Rx.Observable<Maybe<T>>{
+        return mbval.caseOf({
+           just: val => { 
+               let b = val.map(Maybe.maybe)
+               return b;
+           },
+           nothing: ()=> Rx.Observable.from([Maybe.nothing<T>()])  
+       })
+    }
+   
+
+    public static mapToRxFallback<T>(mb: Maybe<T>, func:()=> Rx.Observable<Maybe<T>>){
+        return mb.caseOf({
+                just: (val) => Rx.Observable.of(Maybe.maybe(val)),
+                nothing: ()=> func(),
+                });
+    }
+
+    public static booleanToMaybe<T> (value:T, condition:boolean) {
         return condition ? TsMonad.Maybe.maybe(value) : TsMonad.Maybe.nothing<T>();
     }
-    public static MapLeft<L,R, T>(either: Either<L,R>, fun:(L)=>T) : Either<T,R> {
+    
+    public static mapLeft<L,R, T>(either: Either<L,R>, fun:(L)=>T) : Either<T,R> {
         return either.caseOf({
             left: l => Either.left<T,R>(fun(l)),
             right: r=> Either.right<T,R>(r),
-        });
+        }); 
     }
-    public static FromEitherToMaybe<L,R>(either:Either<L,R>){
+    
+    public static fromEitherToMaybe<L,R>(either:Either<L,R>){
         return either.caseOf({
             left: l=> Maybe.nothing<R>(),
             right: r => Maybe.maybe(r)
         })
+    }
+
+    static sequence<L, R>(entries: TsMonad.Either<L, R>[]): TsMonad.Either<L, R[]> {
+        let acc = [];
+        let errors = [];
+        entries.map(e => e.caseOf({
+            left: msg => errors.push(msg),
+            right: te => acc.push(te)
+        }));
+        if (_.any(errors))
+            return TsMonad.Either.left(_.first(errors))
+        return TsMonad.Either.right(acc);
+
+    }
+
+
+    static reduceLeftToRx <L,R>( data: TsMonad.Either<L, Rx.Observable< TsMonad.Either<L, R>>>) : Rx.Observable< TsMonad.Either<L, R>>{
+        return data.caseOf({
+            left: l => Rx.Observable.of(TsMonad.Either.left(l)),
+            right: r => r
+        })
+        
     }
 
 }
