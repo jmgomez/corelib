@@ -5,6 +5,7 @@ export declare class DynamicHelpers {
 }
 export declare class ObjectUtils {
     static getConstructorName(obj: object): string;
+    static removeIntersectionProps<T, K extends T>(field: K, props: T): K;
     static addFunctionsToPrototype: (baseType: any, functionsModule: any) => void;
     private static resolvePathAsArray;
     private static extractValue;

@@ -24,6 +24,17 @@ export class ObjectUtils {
 
         return obj.constructor.name;
     }
+
+    static removeIntersectionProps<T, K extends T>(field:K, props:T){
+        let copy = JSON.parse(JSON.stringify(field)) as K;
+        
+        let deleteProp = p => delete copy[p]
+        Object.keys(props)
+               .forEach(deleteProp)
+               
+        return copy;
+    }
+
     static addFunctionsToPrototype = (baseType:any, functionsModule:any) => {
         Object.keys(functionsModule)
             .filter(key=> ObjectUtils.getConstructorName((functionsModule[key] as any)) == "Function")
@@ -122,8 +133,6 @@ export class MonadUtils {
         })
 
     }
-
-
 
     static mbJoinArr<T>(mb : Maybe<Maybe<T>[]>) : Maybe<T>[] {
         return mb.caseOf({
