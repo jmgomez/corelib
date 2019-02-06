@@ -9,5 +9,5 @@ export class NodeUtils {
 
     static writeError =  (res:Response) => NodeUtils.writeResponse(res, 500);
 
-
+    static writeForbidden = (res:Response) => NodeUtils.writeResponse(res, 403)
 }
