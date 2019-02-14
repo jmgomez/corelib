@@ -80,7 +80,7 @@ export declare class DateUtils {
     static IsOlder(a: Date, b: Date): boolean;
     static IsNewer(a: Date, b: Date): boolean;
     static getDifferenceInMs(a: Date, b: Date): number;
-    static getDifferenceInDays(a: Date, b: Date): number;
+    static getDifferenceInDays(a: Date | string, b: Date | string): number;
 }
 export declare class Period {
     static DEFAULT_DAYS_INTERVAL: number;

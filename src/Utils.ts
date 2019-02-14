@@ -1,3 +1,4 @@
+import moment from 'moment';
 import _ from "underscore";
 import * as Rx from 'rxjs'
 import * as uuid from "uuid";
@@ -443,10 +444,12 @@ export class DateUtils {
         return Math.abs(a.valueOf() - b.valueOf());
     }
 
-    public static getDifferenceInDays(a:Date, b:Date){
-        let days = new Date(<any>a - <any>b).getDate() - 1;
+    public static getDifferenceInDays(a:Date | string, b:Date | string){
+        const days = moment(b, "L").diff(moment(a, "L"), 'days');
+
         return days;
     }
+
 }
 
 
