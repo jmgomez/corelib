@@ -4,6 +4,7 @@ import * as Rx from 'rxjs'
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 import {Either, Maybe} from "tsmonad";
+import moment from "moment";
 
 //This will be use to add functions that will be read using reflection in escenarios 
 //of metaprogramming.
