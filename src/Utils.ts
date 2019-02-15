@@ -4,7 +4,6 @@ import * as Rx from 'rxjs'
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 import {Either, Maybe} from "tsmonad";
-import moment from "moment";
 
 //This will be use to add functions that will be read using reflection in escenarios 
 //of metaprogramming.
@@ -287,9 +286,13 @@ export class StringUtils {
     }
 
     public static countWords(s:string){
+        if (StringUtils.isNullOrEmpty(s))
+            return 0;
+
         s = s.replace(/(^\s*)|(\s*$)/gi,"");//exclude  start and end white-space
         s = s.replace(/[ ]{2,}/gi," ");//2 or more space to 1
         s = s.replace(/\n /,"\n"); // exclude newline with a start spacing
+
         return s.split(' ').length;
     }
 
