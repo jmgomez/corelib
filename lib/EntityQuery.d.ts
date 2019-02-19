@@ -7,6 +7,7 @@ export declare class EntityQuery {
     static getById<T extends Entity>(entities: T[], id: string): T;
     static exists<T extends Entity>(entities: T[], e: T): boolean;
     static existsById<T extends Entity>(entities: T[], id: string): boolean;
+    static add<T extends Entity>(entities: T[], entity: T): T[];
     static update<T extends Entity>(entities: T[], entity: T): T[];
     static delete<T extends Entity>(entities: T[], entity: T): T[];
     static getDifference<T extends Entity>(entities: T[], entitiesToRemove: T[]): T[];

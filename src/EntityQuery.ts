@@ -27,6 +27,9 @@ export class EntityQuery {
         return _(entities).any(et=> et.id == id);
     }
 
+    static add<T extends Entity>(entities:T[], entity:T){
+        return entities.concat(entity)
+    }
 
     static update<T extends Entity>(entities:T[], entity:T){
         return entities.map(e=>EntityQuery.equals(e, entity)? entity : e);
