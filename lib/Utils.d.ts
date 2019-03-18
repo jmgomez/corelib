@@ -25,6 +25,7 @@ export declare class MonadUtils {
     static CreateMaybeFromArray<T>(value: T[]): TsMonad.Maybe<T[]>;
     static CreateMaybeFromFirstElementOfAnArray<T>(value: T[]): TsMonad.Maybe<T>;
     static mbJoinRx<T>(mbval: Maybe<Rx.Observable<T>>): Rx.Observable<Maybe<T>>;
+    static eitherJoinRx<L, R>(either: Either<L, Rx.Observable<R>>): Rx.Observable<Either<L, R>>;
     static mapToRxFallback<T>(mb: Maybe<T>, func: () => Rx.Observable<Maybe<T>>): Rx.Observable<TsMonad.Maybe<T>>;
     static booleanToMaybe<T>(value: T, condition: boolean): TsMonad.Maybe<T>;
     static mapLeft<L, R, T>(either: Either<L, R>, fun: (L: any) => T): Either<T, R>;

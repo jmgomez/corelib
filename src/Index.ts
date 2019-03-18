@@ -1,5 +1,6 @@
 export * from './Entity'
 export * from './EntityQuery'
+export * from './EntityCommand'
 export * from './Mappers'
 export * from './Repository'
 export * from './RepositoryQuery'

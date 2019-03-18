@@ -139,7 +139,7 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
         let addCmd = (db:Db)=> Rx.Observable.fromPromise(db.collection(this.collection).insertMany(values.map(v=>this.toMongoEntity(v)))).map(val=>values);
         return this.executeCommandAndCloseConn(addCmd);
     }
-
+ 
     update(value: T) {
         let updateCmd = (db:Db)=>Rx.Observable.fromPromise(db.collection(this.collection).updateOne({_id:value.id}, {$set: this.toMongoEntity(value)}))
             .map(r=>{               

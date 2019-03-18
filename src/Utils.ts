@@ -170,6 +170,13 @@ export class MonadUtils {
     }
    
 
+    static eitherJoinRx<L, R>(either : Either<L, Rx.Observable<R>>) : Rx.Observable<Either<L, R>>{
+        return either.caseOf({
+             left : left => Rx.Observable.from([Either.left<L,R>(left)]),
+             right : right => right.map(r => Either.right<L,R>(r))
+         })
+     }
+     
     public static mapToRxFallback<T>(mb: Maybe<T>, func:()=> Rx.Observable<Maybe<T>>){
         return mb.caseOf({
                 just: (val) => Rx.Observable.of(Maybe.maybe(val)),
