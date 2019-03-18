@@ -1,0 +1,1 @@
+{"version":3,"file":"EntityCommand.d.ts","sourceRoot":"","sources":["../src/EntityCommand.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,MAAM,EAAE,MAAM,UAAU,CAAC;AAElC,qBAAa,aAAa,CAAE,CAAC,SAAS,MAAM;IACxC,MAAM,CAAC,WAAW,CAAC,CAAC,SAAS,MAAM,EAAE,CAAC,SAAS,MAAM,CAAC,EAAE,CAAC,EAAC,CAAC,EAAE,GAAG,EAAC,CAAC,EAAE,KAAK,EAAC,GAAG;CAIhF"}
