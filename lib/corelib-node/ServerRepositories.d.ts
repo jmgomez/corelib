@@ -36,6 +36,7 @@ export declare class MongoRepository<T extends Entity> implements IRxRepository<
     executeCommandAndCloseConn<E, T>(cmd: (db: Db) => Rx.Observable<T>): Rx.Observable<T>;
     getAll(): Rx.Observable<T[]>;
     getAllBy(query: any, exclude?: any): Rx.Observable<T[]>;
+    getAllByWithSteps(query: any, exclude?: any): Rx.Observable<T[]>;
     add(value: T): Rx.Observable<T>;
     addMany(values: T[]): Rx.Observable<T[]>;
     update(value: T): Rx.Observable<T>;

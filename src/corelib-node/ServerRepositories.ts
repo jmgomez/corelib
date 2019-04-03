@@ -2,10 +2,11 @@ import { IRepository, IRxRepository, SyncRxRepository} from "../Repository";
 import * as Rx from "rxjs";
 import * as TsMonad from 'tsmonad';
 import * as fs from "fs";
-import {connect, Db, MongoClient} from "mongodb";
+import {connect, Db, MongoClient, Cursor} from "mongodb";
 import {Entity} from "../Entity";
 import {EntityQuery} from "../EntityQuery";
 import {MonadUtils} from "../Utils";
+import _ from "underscore";
 
 export class FileLocalRepository<T extends Entity> implements IRepository<T> {
 
@@ -125,9 +126,35 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
         return getAllCmd(this.db);
     }
 
-    getAllBy(query:any, exclude?:any){    
-        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity).toArray())as Rx.Observable<T[]>;
+    getAllBy(query:any, exclude?:any){        
+        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).toArray())as Rx.Observable<T[]>;   
         return getAllCmd(this.db);
+    }
+
+    getAllByWithSteps(query:any, exclude?:any){    
+                
+        let getCursor =  (skip:number, limit:number) => {
+            let cursor = this.db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity)
+            return Rx.Observable.fromPromise(cursor.skip(skip).limit(limit).toArray());
+        }
+
+        let generateSteps = (step:number) => {
+            let countStream = Rx.Observable.fromPromise(this.db.collection(this.collection).find(query, exclude).count());
+            return countStream.map(total=>{
+                let lastStep = total % step;
+                let numberSteps = Number.parseInt((total / step) as any);
+                let steps = _.range(0, numberSteps).map(skipMult => [skipMult*step, step] as [number, number])
+                steps.push([numberSteps*step, lastStep]) 
+               
+                return steps
+            })
+            .flatMap(steps => {
+                let cursors = steps.map(step=>getCursor(step[0], step[1]))
+                return Rx.Observable.zip(... cursors).map( arr => arr.reduce((a,b)=>a.concat(b))) 
+            })
+           
+        }
+        return generateSteps(1000);
     }
 
     add(value: T){

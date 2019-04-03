@@ -42,6 +42,9 @@ export declare class NumberUtils {
     static isInInterval(a: Number, b: Number, n: Number): boolean;
     static getPercentage(timecards: number, totalTimecards: number): number;
 }
+export declare class BooleanUtils {
+    static alwaysTrue(): boolean;
+}
 export declare class StringUtils {
     static empty: string;
     static from<T>(value: T): string;

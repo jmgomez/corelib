@@ -77,8 +77,8 @@ export class ObjectUtils {
             }
             return MonadUtils.CreateMaybeFromNullable(expandedObject);
         } catch(e){
-            // console.warn(e);
-            // console.error("FALLA EN ", path, obj)
+            console.warn(e);
+            console.error("FALLA EN ", path, obj)
             return TsMonad.Maybe.nothing();
         }
     }
@@ -226,6 +226,7 @@ export class MonadUtils {
 
 }
 
+
 export class NumberUtils {
     //Element should have an id property
     static generateNextId(elements:any[]){
@@ -255,6 +256,11 @@ export class NumberUtils {
     static getPercentage(timecards: number, totalTimecards: number) {
         if(totalTimecards==0) return 0;
         return parseInt(((timecards*100)/totalTimecards).toString());
+    }
+}
+export class BooleanUtils {
+    public static alwaysTrue (){
+        return true;
     }
 }
 export class StringUtils {
