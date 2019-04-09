@@ -127,7 +127,8 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
     }
 
     getAllBy(query:any, exclude?:any){        
-        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).toArray())as Rx.Observable<T[]>;   
+        //let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).toArray())as Rx.Observable<T[]>;
+        let getAllCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity).toArray()) as Rx.Observable<T[]>;
         return getAllCmd(this.db);
     }
 
