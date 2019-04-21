@@ -14,26 +14,23 @@ export class RequestHelperNodeImpl {
 
     static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) : Rx.Observable<any>{
         method = method ? method : "POST";
+        console.log(url, method, data)
         return Rx.Observable.fromPromise(fetch(this.prepareRequest(url, method, data))).flatMap(res=>{
             if(res.ok) 
                 return new Rx.Observable( observer =>{
                     try{
-                        if(!res.bodyUsed)
-                            res.json().then( json =>{
-                                observer.next(json)
-                                observer.complete();
-                            }).catch(e => observer.error(e))
-                        else
-                            observer.error(Error("Buffer for response read"))
+                        res.json().then( json =>{                                  
+                            observer.next(json)
+                            observer.complete();
+                        })
+                    
                     }catch(e){
                         observer.error(e)
-                    }
-                })
-
+                    } });
              if (onError)
                  onError(res);
             return Rx.Observable.throw(new Error(`Server Response ${ res.status } ${ res.statusText } URL ${url} Method: ${ method }`))
-        });
+        }).share();
         //AT some point fix this
         // let promise = fetch(this.prepareRequest(url, method, data));
         // return Rx.Observable.fromPromise(promise.then(res=>res.json()).catch(e=> {  
