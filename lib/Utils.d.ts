@@ -16,6 +16,7 @@ export declare class RXUtils {
 }
 export declare class MonadUtils {
     static sequenceMb<T>(entities: Maybe<T>[]): Maybe<T[]>;
+    static reverseMaybe<T>(mb: Maybe<T>, defaultValue: T): TsMonad.Maybe<T>;
     static mbConcat<T>(mba: Maybe<T>[], mbb: Maybe<T>): Maybe<T>[];
     static mbConcatR<T>(mba: Maybe<T[]>, mbb: Maybe<T[]>): Maybe<T[]>;
     static sequenceA<T>(mentities: Maybe<T[]>): Maybe<T>[];

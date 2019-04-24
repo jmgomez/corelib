@@ -14,7 +14,6 @@ export class RequestHelperNodeImpl {
 
     static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) : Rx.Observable<any>{
         method = method ? method : "POST";
-        console.log(url, method, data)
         return Rx.Observable.fromPromise(fetch(this.prepareRequest(url, method, data))).flatMap(res=>{
             if(res.ok) 
                 return new Rx.Observable( observer =>{

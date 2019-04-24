@@ -118,6 +118,13 @@ export class MonadUtils {
 
     }
 
+    static reverseMaybe<T>(mb:Maybe<T>, defaultValue:T){
+        return mb.caseOf({
+            nothing: ()=> Maybe.maybe(defaultValue),
+            just: (val)=> Maybe.nothing()
+        })
+    }
+
     static mbConcat<T>(mba:Maybe<T>[], mbb:Maybe<T>) : Maybe<T>[]{
         return mba.concat(mbb)
     }
