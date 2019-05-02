@@ -16,10 +16,12 @@ export declare class RXUtils {
 }
 export declare class MonadUtils {
     static sequenceMb<T>(entities: Maybe<T>[]): Maybe<T[]>;
-    static reverseMaybe<T>(mb: Maybe<T>, defaultValue: T): TsMonad.Maybe<T>;
+    static sequenceMbIgnoringNothing<T>(entities: Maybe<T>[]): Maybe<T[]>;
+    static reverseMaybe<T, K>(mb: Maybe<T>, defaultValue: K): TsMonad.Maybe<K>;
     static mbConcat<T>(mba: Maybe<T>[], mbb: Maybe<T>): Maybe<T>[];
     static mbConcatR<T>(mba: Maybe<T[]>, mbb: Maybe<T[]>): Maybe<T[]>;
     static sequenceA<T>(mentities: Maybe<T[]>): Maybe<T>[];
+    static unwrapMbListSafely<T>(mbEntities: Maybe<T[]>): T[];
     static mbJoinArr<T>(mb: Maybe<Maybe<T>[]>): Maybe<T>[];
     static Ignore(): void;
     static CreateMaybeFromNullable<T>(value?: T): TsMonad.Maybe<T>;

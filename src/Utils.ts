@@ -101,7 +101,7 @@ export class RXUtils {
 }
 export class MonadUtils {
 
-
+    //nothing when one is nothing.
     static sequenceMb<T>(entities: Maybe<T>[]): Maybe<T[]> {
         let acc = [] as T[];
         let nothing = false;
@@ -110,15 +110,20 @@ export class MonadUtils {
             just: e => acc.push(e)
         }));
         if ((nothing)) {
-            console.log("REACH NOTHING")
+            // console.log("REACH NOTHING")
             return Maybe.nothing<T[]>();
         }
-        console.log("ACC ", acc)
+        // console.log("ACC ", acc)
         return Maybe.just(acc);
 
     }
+    //only nothing when all are nothing
+    static sequenceMbIgnoringNothing<T>(entities: Maybe<T>[]): Maybe<T[]> {
+        let justs = entities.filter(Maybe.isJust).map(mb => mb.valueOrThrow(Error("Type hole in the utils.")))
+        return justs.length == 0 ? Maybe.nothing<T[]>() : Maybe.maybe(justs)       
+    }
 
-    static reverseMaybe<T>(mb:Maybe<T>, defaultValue:T){
+    static reverseMaybe<T, K>(mb:Maybe<T>, defaultValue:K){
         return mb.caseOf({
             nothing: ()=> Maybe.maybe(defaultValue),
             just: (val)=> Maybe.nothing()
@@ -140,6 +145,13 @@ export class MonadUtils {
             just: values => values.map(v=>Maybe.just(v))
         })
 
+    }
+
+    static unwrapMbListSafely<T>(mbEntities: Maybe<T[]>){
+        return mbEntities.caseOf({
+            just: list => list,
+            nothing: ()=> [] as T[]
+        })
     }
 
     static mbJoinArr<T>(mb : Maybe<Maybe<T>[]>) : Maybe<T>[] {
