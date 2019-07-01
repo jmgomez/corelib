@@ -9,10 +9,12 @@ import {Either, Maybe} from "tsmonad";
 //of metaprogramming.
 export class DynamicHelpers {
 
-}
+} 
+
 
 export class ObjectUtils {
     static getConstructorName (obj:object){
+
         if(obj.constructor.name == undefined)
             Object.defineProperty(Function.prototype, 'name', {
                 get: function() {
@@ -64,7 +66,7 @@ export class ObjectUtils {
         let expandObject = ()=>  isObject ? obj : path.split('.').reduce(index, obj);
 
         return expandObject();
-
+ 
     }
 
     static expandObjectFromPath = (path:string, obj:any) => {  //retrieve the path (objext.innerObject) to the actual value

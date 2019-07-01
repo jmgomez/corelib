@@ -132,7 +132,7 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
         return getAllCmd(this.db);
     }
 
-    getAllByWithSteps(query:any, exclude?:any){    
+    getAllByWithSteps(query:any, exclude?:any) :  Rx.Observable<T[]>{    
                 
         let getCursor =  (skip:number, limit:number) => {
             let cursor = this.db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity)
