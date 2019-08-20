@@ -17,7 +17,7 @@ export class SimpleCache<T> {
         simpleCache.invalidateCachePolicy = invalidateCachePolicy;
         simpleCache.invalidateCachePolicy()
             .subscribe(d => {
-                    simpleCache.data = null;
+                    simpleCache.cleanCache()
         })
         return simpleCache;
     }
