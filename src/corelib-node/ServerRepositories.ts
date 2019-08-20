@@ -188,6 +188,7 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
     }
 
     remove(value: T) : Rx.Observable<any> {
+        console.error("THE NAME OF THE COLLECTION IS:" + this.collection)
         let removeCmd = (db:Db) => Rx.Observable.fromPromise(db.collection(this.collection).deleteOne({_id:value.id}));
         return removeCmd(this.db)
     }

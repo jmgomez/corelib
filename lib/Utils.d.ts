@@ -12,7 +12,8 @@ export declare class ObjectUtils {
     static expandObjectFromPath: (path: string, obj: any) => TsMonad.Maybe<any>;
     static assignValueToObjectFromPath: (path: string, obj: any, val: any) => void;
 }
-export declare class RXUtils {
+export declare class RxUtils {
+    static funCache<T>(funcToBeCached: () => Rx.Observable<T>, expiresInMs: number): Rx.Observable<T>;
 }
 export declare class MonadUtils {
     static sequenceMb<T>(entities: Maybe<T>[]): Maybe<T[]>;

@@ -7,6 +7,7 @@ import {Entity} from "./Entity";
 
 export class EntityQuery {
     static equals<T extends Entity>(a:T, b:T){
+        
         return a.id == b.id;
     }
     static getBy<T extends Entity>(entities:T[], entity:T){

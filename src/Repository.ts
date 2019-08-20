@@ -1,6 +1,6 @@
 import {Response} from 'node-fetch';
 import * as TsMonad from 'tsmonad';
-import {DateUtils, MonadUtils, Period, RXUtils} from "./Utils";
+import {DateUtils, MonadUtils, Period} from "./Utils";
 import {Entity } from "./Entity";
 import * as querystring from "querystring";
 import {EntityQuery} from "./EntityQuery";

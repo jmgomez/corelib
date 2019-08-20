@@ -98,8 +98,13 @@ export class ObjectUtils {
     }
 }
 
-export class RXUtils {
-    
+export class RxUtils {
+    static funCache<T>(funcToBeCached:()=>Rx.Observable<T>, expiresInMs : number) : Rx.Observable<T> {
+        let mbStreamOfValue = Maybe.maybe(funcToBeCached())
+        Rx.Observable.timer(0, expiresInMs)
+                    .subscribe(time => { mbStreamOfValue = Maybe.nothing()})
+        return mbStreamOfValue.valueOrCompute(funcToBeCached)                
+    }        
 }
 export class MonadUtils {
 
