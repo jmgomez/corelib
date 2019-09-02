@@ -50,6 +50,7 @@ export declare class InMemoryRepository<T extends Entity> implements IRepository
     getOneBy(query: any): TsMonad.Maybe<T>;
     removeAllBy(query: any): void;
     toRxRepository(): SyncRxRepository<T>;
+    static createAsRxRepo<T extends Entity>(): SyncRxRepository<T>;
 }
 export declare class SyncRxRepository<T extends Entity> implements IRxRepository<T> {
     repo: IRepository<T>;

@@ -70,6 +70,7 @@ export class Route<T extends Entity> {
     };
 
     getById = (req: Request, res: Response)  => {
+        console.log("GETTING BY ID")
         let partialGetOrNotFound =  (maybeEntity:TsMonad.Maybe<T>) => this.executeOrNotFound(maybeEntity, res, NodeUtils.writeResponse(res));
         R.compose(partialGetOrNotFound, this.tryGetByIdParam)(req)
     };

@@ -135,6 +135,10 @@ export class InMemoryRepository<T extends Entity> implements IRepository<T>{
     toRxRepository() {
         return new SyncRxRepository(this);
     }
+
+    static createAsRxRepo<T extends Entity>(){
+        return new InMemoryRepository<T>().toRxRepository();
+    }
 }
 
 export class SyncRxRepository<T extends Entity> implements  IRxRepository<T> {
