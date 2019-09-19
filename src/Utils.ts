@@ -379,7 +379,7 @@ export class StringUtils {
         return crypto.enc.Base64.stringify(crypto.enc.Utf8.parse(str))
     }
     static fromBase64(base64:string){
-        return crypto.enc.Base64.parse(base64)
+        return crypto.enc.Utf8.stringify(crypto.enc.Base64.parse(base64))
     }
 }
 
