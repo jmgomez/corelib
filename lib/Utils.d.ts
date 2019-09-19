@@ -64,6 +64,8 @@ export declare class StringUtils {
     static isNullOrEmpty(str: string): boolean;
     static parseServerContent(str: string): string;
     static splitEmails(emails: string): string[];
+    static toBase64(str: string): string;
+    static fromBase64(base64: string): any;
 }
 export declare class DateUtils {
     static measureExecution(name: string, fun: () => any): any;

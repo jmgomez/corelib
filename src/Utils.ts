@@ -4,7 +4,7 @@ import * as Rx from 'rxjs'
 import * as uuid from "uuid";
 import * as TsMonad from "tsmonad";
 import {Either, Maybe} from "tsmonad";
-
+import * as crypto from 'crypto-js'
 //This will be use to add functions that will be read using reflection in escenarios 
 //of metaprogramming.
 export class DynamicHelpers {
@@ -373,6 +373,13 @@ export class StringUtils {
 
     static splitEmails(emails: string) {
         return emails.split(",").map(e=>e.trim());
+    }
+
+    static toBase64(str:string){
+        return crypto.enc.Base64.stringify(crypto.enc.Utf8.parse(str))
+    }
+    static fromBase64(base64:string){
+        return crypto.enc.Base64.parse(base64)
     }
 }
 
