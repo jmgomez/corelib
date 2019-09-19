@@ -304,6 +304,18 @@ export class StringUtils {
             return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
         }).replace(/\s+/g, '');
     }
+
+    public static canBeConvertedToCamelCase(str:string){
+        let camelCase = StringUtils.toCamelcase(str)
+        try {
+            let a = { camelCase: true};            
+            eval(`a.${camelCase} == true`)
+            return true;
+        } catch (e){
+            return false;
+        }
+    }
+
     public static replaceAll(str:string, search:string, replacement:string){
         return str.split(search).join(replacement);
     }

@@ -53,6 +53,7 @@ export declare class StringUtils {
     static empty: string;
     static from<T>(value: T): string;
     static toCamelcase(str: string): string;
+    static canBeConvertedToCamelCase(str: string): boolean;
     static replaceAll(str: string, search: string, replacement: string): string;
     static replaceMany(strs: string[], search: string, replacement: string): string;
     static parseCCBoolean(value: string): boolean;
@@ -65,7 +66,7 @@ export declare class StringUtils {
     static parseServerContent(str: string): string;
     static splitEmails(emails: string): string[];
     static toBase64(str: string): string;
-    static fromBase64(base64: string): any;
+    static fromBase64(base64: string): string;
 }
 export declare class DateUtils {
     static measureExecution(name: string, fun: () => any): any;
