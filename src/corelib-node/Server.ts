@@ -50,6 +50,12 @@ export class Server {
 
     public start(){
         this.setupRoutes();
+
+        process.on("warning", (e : Error & { type:string })=>{
+            if(e.name == "MaxListenersExceededWarning" && e.type)
+                console.log("EVENT NAME: ", e.type)
+        })
+        
         this.server = this.app.listen(this.port, () => {
             console.log("info", "--> Server "+ObjectUtils.getConstructorName(this)+" successfully started at port %d", this.port);
         });
