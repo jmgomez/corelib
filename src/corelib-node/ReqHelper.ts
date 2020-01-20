@@ -4,13 +4,14 @@ import fetch, {Request, Response} from "node-fetch";
 
 export class RequestHelperNodeImpl {
 
-    static prepareRequest(url:string, method:string, data?:any) {
+    static prepareRequest(url:string, method:string, data?:any, headers?:any) {
+        headers = headers || this.headers();
         if (method === "get")
             return new Request(url, {method: method, headers: this.headers()});
         return new Request(url, {method: method, body: JSON.stringify(data), headers: this.headers()});
     }
 
-
+    
 
     static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) : Rx.Observable<any>{
         method = method ? method : "POST";
