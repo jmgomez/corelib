@@ -1,6 +1,7 @@
 
 import * as Rx from "rxjs";
 import fetch, {Request, Response} from "node-fetch";
+import DigestFetch from 'digest-fetch';
 
 export class RequestHelperNodeImpl {
 
@@ -12,6 +13,24 @@ export class RequestHelperNodeImpl {
     }
 
     
+    //This was added to being able to make digest to atlas
+    static makeGetDigestRequest(username:string, password:string, url: string) : Rx.Observable<any>{
+        let client = new DigestFetch(username, password);        
+        return Rx.Observable.fromPromise<Response>(client.fetch(url)).flatMap(res=>{
+            if(res.ok) 
+                return new Rx.Observable( observer =>{
+                    try{
+                        res.json().then( json =>{                                  
+                            observer.next(json)
+                            observer.complete();
+                        })
+                    
+                    }catch(e){
+                        observer.error(e)
+                    } });          
+            return Rx.Observable.throw(new Error(`Server Response ${ res.status } ${ res.statusText } URL ${url} Method: GET`))
+        }).share();
+    }
 
     static makeRequest(url: string, method?: string, data?: any, onError?:(r:Response)=>void) : Rx.Observable<any>{
         method = method ? method : "POST";

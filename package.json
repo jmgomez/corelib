@@ -22,6 +22,7 @@
   "homepage": "https://github.com/jmgomez/corelib#readme",
   "dependencies": {
     "crypto-js": "^3.1.9-1",
+    "digest-fetch": "^1.0.9",
     "express": "4.16.3",
     "moment": "^2.24.0",
     "mongodb": "3.1.6",
