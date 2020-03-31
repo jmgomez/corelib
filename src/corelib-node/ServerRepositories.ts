@@ -1,4 +1,8 @@
-import { IRepository, IRxRepository, SyncRxRepository} from "../Repository";
+import {
+    IRepository,
+    IRxRepository,
+    SyncRxRepository
+} from "../Repository";
 import * as Rx from "rxjs";
 import * as TsMonad from 'tsmonad';
 import * as fs from "fs";
@@ -7,6 +11,7 @@ import {Entity} from "../Entity";
 import {EntityQuery} from "../EntityQuery";
 import {MonadUtils} from "../Utils";
 import _ from "underscore";
+import {ObjectUtils} from "../../../ocg-core/lib/core/Utils";
 
 export class FileLocalRepository<T extends Entity> implements IRepository<T> {
 
@@ -58,6 +63,15 @@ export class FileLocalRepository<T extends Entity> implements IRepository<T> {
     removeAllBy(query:any){
         this.entities = EntityQuery.getDifference(this.entities, this.getAllBy(query));
         this.persist();
+    }
+
+    countBy(query:any) {
+        return this.entities.filter(query).length;
+    }
+
+    getRangeBy(query:any, skip:number, limit:number, exclude?:any) {
+        let elems = this.getAllBy(query);
+        return _.range(skip, skip + limit).map(i=>elems[i]);
     }
 
     getAllBy(query:any){
@@ -156,6 +170,19 @@ export class MongoRepository<T extends Entity> implements  IRxRepository<T> {
            
         }
         return generateSteps(1000);
+    }
+
+
+    countBy(query:any) {
+        return Rx.Observable.fromPromise(this.db.collection(this.collection).find(query).count());
+    }
+
+    getRangeBy(query:any, skip:number, limit:number, exclude?:any) : Rx.Observable<T[]>{
+        let getCursor =  (skip:number, limit:number) => {
+            let cursor = this.db.collection(this.collection).find(query, exclude).map(this.fromMongoToEntity);
+            return Rx.Observable.fromPromise(cursor.skip(skip).limit(limit).toArray())
+        };
+        return getCursor(skip, limit);
     }
 
     add(value: T){

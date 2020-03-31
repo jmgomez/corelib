@@ -26,6 +26,8 @@ export class Route<T extends Entity> {
         router.route("/deleteall").get(this.deleteAllBy).options(NodeUtils.okOptions);
         router.route("/deleteallby").delete(this.deleteAllBy).options(NodeUtils.okOptions);
         router.route("/getallby").get(this.getAllBy).options(NodeUtils.okOptions);
+        router.route("/countby").get(this.getCountBy).options(NodeUtils.okOptions);
+        router.route("/rangeby").get(this.getRangeBy).options(NodeUtils.okOptions);
         router.route("/:id").all(this.setEntities).get(this.getById).put(this.update).delete(this.delete).options(NodeUtils.okOptions);
         return router;
     }
@@ -61,6 +63,16 @@ export class Route<T extends Entity> {
         this.repo.getAllBy(RepositoryQuery.fromQueryStringTo(query, this.repo))
             .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
     };
+    getCountBy = (req: Request, res: Response) => {
+            let query = req.query;
+            this.repo.countBy(RepositoryQuery.fromQueryStringTo(query, this.repo))
+                .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
+        };
+    getRangeBy = (req: Request, res: Response) => {
+            let query = req.query;
+            this.repo.getRangeBy(RepositoryQuery.fromQueryStringTo(query, this.repo), parseInt(query.skip), parseInt(query.limit))
+                .subscribe(NodeUtils.writeResponse(res), NodeUtils.writeError(res));
+        };
 
 
     deleteAllBy = (req: Request, res: Response) => {

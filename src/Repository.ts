@@ -5,6 +5,7 @@ import {Entity } from "./Entity";
 import * as querystring from "querystring";
 import {EntityQuery} from "./EntityQuery";
 import * as Rx from "rxjs";
+import * as _ from 'underscore'
 
 export interface IRepository<T extends Entity>{
     add : (value:T) => void;
@@ -18,7 +19,11 @@ export interface IRepository<T extends Entity>{
     getAllBy: (query:any)=> T[];
     getById : (id:string) => TsMonad.Maybe<T>;
     getOneBy : (query:any) => TsMonad.Maybe<T>;
+    countBy : (query:any) => number;
+    getRangeBy : (query:any, skip:number, limit:number) =>T[];
 }
+
+
 
 export type ReqHelper = {
     makeRequest: (url: string, method: string, data?: any, onError?:(r:Response)=>void) => Rx.Observable<any>
@@ -74,13 +79,21 @@ export class APIRepository<T extends Entity> implements IRxRepository<T>{
         let path = this.endPoint+"deleteallby"+query;
         return this.requestHelper.makeRequest(path, 'delete', {}, this.onError.bind(this))
     }
-
     getAllBy(query:any){
         let path = this.endPoint+"getallby"+query;
         return this.requestHelper.makeRequest(path, 'get', {}, this.onError.bind(this))
         // throw new Error("You don't have to query from the API. The server router will handle it. In the future it will be done through GraphQL");
         // return Bacon.fromArray([]);
     }
+    getRangeBy(query:any, skip:number, limit:number){
+        let path = `${this.endPoint}rangeby${query}&skip=${skip}&limit=${limit}`;
+        return this.requestHelper.makeRequest(path, 'get', {}, this.onError.bind(this))
+    }
+    countBy(query:any){
+        let path = this.endPoint+"countby"+query;
+        return this.requestHelper.makeRequest(path, 'get', {}, this.onError.bind(this))
+    }
+
 
     updateAll: (value: T[]) => Rx.Observable <T[]>;
 
@@ -130,6 +143,15 @@ export class InMemoryRepository<T extends Entity> implements IRepository<T>{
     }
     removeAllBy(query:any){
         return this.removeAll();
+    }
+
+    countBy(query:any) {
+        return this.elems.filter(query).length;
+    }
+
+    getRangeBy(query:any, skip:number, limit:number, exclude?:any) {
+        let elems = this.getAllBy(query);
+       return _.range(skip, skip + limit).map(i=>elems[i]);
     }
 
     toRxRepository() {
@@ -192,6 +214,13 @@ export class SyncRxRepository<T extends Entity> implements  IRxRepository<T> {
     getOneBy(query:any){
         return Rx.Observable.of(this.repo.getOneBy(query));
     }
+    countBy(query:any) {
+        return Rx.Observable.of(this.repo.countBy(query));
+    }
+
+    getRangeBy(query:any, skip:number, limit:number) {
+       return Rx.Observable.of(this.repo.getRangeBy(query, skip, limit));
+    }
 
     asInMemoryRepository(){
         return this.repo as InMemoryRepository<T>;
@@ -211,6 +240,8 @@ export interface IRxRepository <T extends Entity> {
     getAllBy: (query:any)=> Rx.Observable<T[]>;
     getById : (id:string) => Rx.Observable<TsMonad.Maybe<T>>;
     getOneBy : (query:any) => Rx.Observable<TsMonad.Maybe<T>>;
+    countBy : (query:any) =>  Rx.Observable<number>;
+    getRangeBy : (query:any, skip:number, limit:number) => Rx.Observable<T[]>;
 }
 
 

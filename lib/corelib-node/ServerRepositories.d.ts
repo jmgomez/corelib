@@ -17,6 +17,8 @@ export declare class FileLocalRepository<T extends Entity> implements IRepositor
     remove(entity: T): void;
     removeAll(): void;
     removeAllBy(query: any): void;
+    countBy(query: any): number;
+    getRangeBy(query: any, skip: number, limit: number, exclude?: any): T[];
     getAllBy(query: any): T[];
     getById(id: string): TsMonad.Maybe<T>;
     getOneBy(query: any): TsMonad.Maybe<T>;
@@ -37,6 +39,8 @@ export declare class MongoRepository<T extends Entity> implements IRxRepository<
     getAll(): Rx.Observable<T[]>;
     getAllBy(query: any, exclude?: any): Rx.Observable<T[]>;
     getAllByWithSteps(query: any, exclude?: any): Rx.Observable<T[]>;
+    countBy(query: any): Rx.Observable<number>;
+    getRangeBy(query: any, skip: number, limit: number, exclude?: any): Rx.Observable<T[]>;
     add(value: T): Rx.Observable<T>;
     addMany(values: T[]): Rx.Observable<T[]>;
     update(value: T): Rx.Observable<T>;

@@ -14,6 +14,8 @@ export interface IRepository<T extends Entity> {
     getAllBy: (query: any) => T[];
     getById: (id: string) => TsMonad.Maybe<T>;
     getOneBy: (query: any) => TsMonad.Maybe<T>;
+    countBy: (query: any) => number;
+    getRangeBy: (query: any, skip: number, limit: number) => T[];
 }
 export declare type ReqHelper = {
     makeRequest: (url: string, method: string, data?: any, onError?: (r: Response) => void) => Rx.Observable<any>;
@@ -31,6 +33,8 @@ export declare class APIRepository<T extends Entity> implements IRxRepository<T>
     getById(id: string): Rx.Observable<TsMonad.Maybe<any>>;
     removeAllBy(query: any): Rx.Observable<any>;
     getAllBy(query: any): Rx.Observable<any>;
+    getRangeBy(query: any, skip: number, limit: number): Rx.Observable<any>;
+    countBy(query: any): Rx.Observable<any>;
     updateAll: (value: T[]) => Rx.Observable<T[]>;
     removeAll: () => Rx.Observable<any>;
     getOneBy: () => Rx.Observable<TsMonad.Maybe<T>>;
@@ -49,6 +53,8 @@ export declare class InMemoryRepository<T extends Entity> implements IRepository
     getById(id: string): TsMonad.Maybe<T>;
     getOneBy(query: any): TsMonad.Maybe<T>;
     removeAllBy(query: any): void;
+    countBy(query: any): number;
+    getRangeBy(query: any, skip: number, limit: number, exclude?: any): T[];
     toRxRepository(): SyncRxRepository<T>;
     static createAsRxRepo<T extends Entity>(): SyncRxRepository<T>;
 }
@@ -66,6 +72,8 @@ export declare class SyncRxRepository<T extends Entity> implements IRxRepository
     getAllBy(query: any): Rx.Observable<T[]>;
     getById(id: string): Rx.Observable<TsMonad.Maybe<T>>;
     getOneBy(query: any): Rx.Observable<TsMonad.Maybe<T>>;
+    countBy(query: any): Rx.Observable<number>;
+    getRangeBy(query: any, skip: number, limit: number): Rx.Observable<T[]>;
     asInMemoryRepository(): InMemoryRepository<T>;
 }
 export interface IRxRepository<T extends Entity> {
@@ -80,6 +88,8 @@ export interface IRxRepository<T extends Entity> {
     getAllBy: (query: any) => Rx.Observable<T[]>;
     getById: (id: string) => Rx.Observable<TsMonad.Maybe<T>>;
     getOneBy: (query: any) => Rx.Observable<TsMonad.Maybe<T>>;
+    countBy: (query: any) => Rx.Observable<number>;
+    getRangeBy: (query: any, skip: number, limit: number) => Rx.Observable<T[]>;
 }
 export declare class UnitRxRepository<T extends Entity> {
     private repo;

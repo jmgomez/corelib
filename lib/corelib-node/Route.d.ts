@@ -11,6 +11,8 @@ export declare class Route<T extends Entity> {
     deleteAll: (req: Request, res: Response) => void;
     create: (req: Request, res: Response) => void;
     getAllBy: (req: Request, res: Response) => void;
+    getCountBy: (req: Request, res: Response) => void;
+    getRangeBy: (req: Request, res: Response) => void;
     deleteAllBy: (req: Request, res: Response) => void;
     getById: (req: Request, res: Response) => void;
     update: (req: Request, res: Response) => void;
