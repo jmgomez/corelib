@@ -10,7 +10,7 @@ import {connect, Db, MongoClient, Cursor} from "mongodb";
 import {Entity} from "../Entity";
 import {EntityQuery} from "../EntityQuery";
 import {MonadUtils} from "../Utils";
-import _ from "underscore";
+import * as _  from  "underscore";
 
 export class FileLocalRepository<T extends Entity> implements IRepository<T> {
 
