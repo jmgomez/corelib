@@ -253,7 +253,7 @@ export class UnitRxRepository<T extends Entity> {
            just: t=> this.repo.update(value),
            nothing: ()=> this.repo.add(value).catch(e=> this.updateOrCreate(value))
        })).catch(e=>{
-           console.log("Fails trying to updating. Probably because the entity does not exist yet. Enforcing the creation")
+           console.log("Fails trying to update. Probably because the entity does not exist yet. Enforcing the creation")
           return this.repo.add(value);
        });
 
